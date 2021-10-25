@@ -29,3 +29,10 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size)
 	(void)alloc_size;
 	return (NULL);
 }
+
+int					ft_mal_free_heap(t_s_ft_mal_heap_info *heap)
+{
+	if (heap)
+		return (munmap((void*)heap, heap->total_size));// return function status
+	return (FT_MAL_SUCCESS);
+}

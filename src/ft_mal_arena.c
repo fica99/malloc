@@ -66,7 +66,7 @@ static t_s_ft_mal_state	*ft_mal_new_arena(size_t alloc_size)
 	// check mutex initialization
 	if (pthread_mutex_init(&arena->mutex, NULL) != FT_MAL_SUCCESS)
 	{
-//		ft_mal_free_heap(heap_info);
+		ft_mal_free_heap(heap_info);
 		return (NULL);
 	}
 	arena->next = NULL;
@@ -142,6 +142,8 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena, p
 	ft_mal_arena_tid(res_arena->arena_id, tid, true);
 	return (res_arena);
 }
+
+#include <stdio.h>
 
 t_s_ft_mal_state		*ft_mal_get_available_arena(size_t alloc_size)
 {

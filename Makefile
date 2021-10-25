@@ -40,7 +40,7 @@ SRC_FLS			:=		$(PRE_FLS)		\
 # ------------  LIBFTPRINTF  ------------------------------------------------- #
 LFTPRINTF		:=		libftprintf.a
 LFTPRINTF_DIR	:=		$(LIB_DIR)/libftprintf
-LFTPRINTF_HS_DIR:=		$(LFT_PRINTF_DIR)/includes
+LFTPRINTF_HS_DIR:=		$(LFTPRINTF_DIR)/include
 
 # ------------  FILEPATHS  --------------------------------------------------- #
 SRCS			:=		$(addprefix $(SRC_DIR)/, $(SRC_FLS))
@@ -58,7 +58,7 @@ IFLGS			:=		-I $(HDR_DIR) -I $(LFTPRINTF_HS_DIR)
 # -MD deps with system headers,
 # -MP dummy deps for header files (in case removing .h file)
 DEPFLGS			:=		-MD -MP
-LFLGS			:=		-L $(LFTPRINTF_DIR) -lftprintf -lpthread
+LFLGS			:=		-L $(LFTPRINTF_DIR) -lftprintf -lpthread -lm
 
 # ------------  RULES  ------------------------------------------------------- #
 .PHONY: all clean fclean re
