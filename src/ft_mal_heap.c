@@ -26,4 +26,6 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size)
 	// else
 	// 	size = HEAP_MAX_SIZE;
 	// size = (size + page_mask) & ~page_mask;
+	(void)alloc_size;
+	return (NULL);
 }

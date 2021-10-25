@@ -58,7 +58,7 @@ IFLGS			:=		-I $(HDR_DIR) -I $(LFTPRINTF_HS_DIR)
 # -MD deps with system headers,
 # -MP dummy deps for header files (in case removing .h file)
 DEPFLGS			:=		-MD -MP
-LFLGS			:=		-L $(LFTPRINTF_DIR) -lftprintf
+LFLGS			:=		-L $(LFTPRINTF_DIR) -lftprintf -lpthread
 
 # ------------  RULES  ------------------------------------------------------- #
 .PHONY: all clean fclean re

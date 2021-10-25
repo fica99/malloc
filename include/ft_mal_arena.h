@@ -16,29 +16,10 @@
 *************************** System headers ************************************
 */
 
-/*
-****************** pthread_mutex_t ********
-****************** pthread_mutex_trylock **
-****************** pthread_mutex_unlock ***
-****************** pthread_mutex_init *****
-****************** pthread_mutex_destroy **
-*/
-# include <pthread.h>
-
 
 /*
 *************************** Macroses  *****************************************
 */
-
-/*
-******************* Limits ***************************************
-*/
-# define FT_MAL_MAX_NB_ARENAS 2
-/*
-******************* Arenas mutex operations **********************
-*/
-# define FT_MAL_ARENA_TRYLOCK(mutex_ptr) (pthread_mutex_trylock(mutex_ptr))
-# define FT_MAL_ARENA_UNLOCK(mutex_ptr) (pthread_mutex_unlock(mutex_ptr))
 
 
 /*
