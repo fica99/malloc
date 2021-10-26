@@ -18,11 +18,17 @@ void	*malloc(size_t size)
 {
 	t_s_ft_mal_state	*arena;
 
+	// check requesting memory of size 0
+	if (!size)
+		return (NULL);
+
 	arena = ft_mal_get_available_arena(size);
 
 	// error happened
 	if (!arena)
 		return (NULL);
 	
+	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
+
 	return (NULL);	
 }

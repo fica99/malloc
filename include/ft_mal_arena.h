@@ -51,4 +51,10 @@ typedef struct				s_ft_mal_state
 ******************** ft_mal_arena.c *****************************
 */
 t_s_ft_mal_state			*ft_mal_get_available_arena(size_t alloc_size);
+
+
+/*
+*************************** Global variables ********************************
+*/
+extern t_s_ft_mal_state		*g_ft_arena;
 #endif

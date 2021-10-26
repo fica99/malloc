@@ -4,6 +4,7 @@
 int	main(void)
 {
 	int *a = malloc(100);
-	printf("Hello %ls\n", a);
+	//printf("Hello %ls\n", a);
+	free(a);
 	return (0);
 }

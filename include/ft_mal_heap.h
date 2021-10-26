@@ -14,17 +14,6 @@
 # define FT_MAL_HEAP_H
 
 /*
-*************************** System headers ************************************
-*/
-
-/*
-******************* mmap *******************************
-******************* munmap ******************************
-*/
-#include <sys/mman.h>
-
-
-/*
 *************************** User headers ************************************
 */
 
@@ -33,10 +22,10 @@
 */
 # include "ft_mal_arena.h"
 
-
 /*
-*************************** Macros ********************************************
+*************************** Macroses ********************************************
 */
+
 
 /*
 *************************** Structures ****************************************
@@ -48,8 +37,9 @@
 typedef struct					s_ft_mal_heap_info
 {
 	t_s_ft_mal_state			*ar_ptr;	/* Arena for this heap. */
+	struct s_ft_mal_heap_info	*next;		/* Next heap. */
 	struct s_ft_mal_heap_info	*prev;		/* Previous heap. */
-	size_t						total_size;	/* Total size of all block of memory in bytes. */
+	size_t						total_size;	/* Total size of the heap. */
 }								t_s_ft_mal_heap_info;
 
 # define FT_MAL_HEAP_INFO_SIZE (sizeof(t_s_ft_mal_heap_info))
@@ -61,7 +51,7 @@ typedef struct					s_ft_mal_heap_info
 /*
 ******************** ft_mal_heap.c *****************************
 */
-t_s_ft_mal_heap_info			*ft_mal_new_heap(size_t alloc_size);
+t_s_ft_mal_heap_info			*ft_mal_new_heap(size_t alloc_size, bool is_arena_included);
 int								ft_mal_free_heap(t_s_ft_mal_heap_info *heap);
 #endif
 

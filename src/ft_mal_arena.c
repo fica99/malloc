@@ -43,6 +43,17 @@
 # define FT_MAL_MAX_NB_ARENAS 8
 # define FT_MAL_MAX_THREADS 410669
 
+
+/*
+*************************** Global variables ********************************
+*/
+
+/*
+******************* Pointer to arenas ****************************
+*/
+t_s_ft_mal_state	*g_ft_arena = NULL;
+
+
 static pid_t			gettid(void)
 {
 	pid_t tid = (pid_t)syscall(SYS_gettid);
@@ -55,13 +66,13 @@ static t_s_ft_mal_state	*ft_mal_new_arena(size_t alloc_size)
 	t_s_ft_mal_state		*arena;
 	t_s_ft_mal_heap_info	*heap_info;
 
-	heap_info = ft_mal_new_heap(alloc_size + FT_MAL_STATE_SIZE);
+	heap_info = ft_mal_new_heap(alloc_size, true);
 	
 	// error check
 	if (!heap_info)
 		return (NULL);
 	
-	arena = FT_MAL_HEAP_INFO_SHIFT(heap_info);
+	arena = heap_info->ar_ptr;
 	
 	// check mutex initialization
 	if (pthread_mutex_init(&arena->mutex, NULL) != FT_MAL_SUCCESS)
@@ -99,7 +110,10 @@ static t_s_ft_mal_state	*ft_mal_get_saved_arena_tid(t_s_ft_mal_state *arena, pid
 	while (arena)
 	{
 		if (ft_mal_arena_tid(arena->arena_id, tid, false))
+		{
+			FT_MAL_MUTEX_LOCK(&arena->mutex);
 			return (arena);
+		}
 		arena = arena->next;
 	}
 	return (NULL);
@@ -143,23 +157,22 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena, p
 	return (res_arena);
 }
 
-#include <stdio.h>
-
 t_s_ft_mal_state		*ft_mal_get_available_arena(size_t alloc_size)
 {
-	static t_s_ft_mal_state	*arena;
+	t_s_ft_mal_state		*current_arena;
 	pid_t					tid;
 	t_s_ft_mal_state		*res_arena;
 
+	current_arena = g_ft_arena;
 	// get current thread id
 	tid = gettid();
-	
+
 	// check saved tids for current arenas
-	res_arena = ft_mal_get_saved_arena_tid(arena, tid);
+	res_arena = ft_mal_get_saved_arena_tid(current_arena, tid);
 	if (res_arena)
 		return (res_arena);
 
 	// find empty arena or create new
-	res_arena = ft_mal_find_available_arena(&arena, tid, alloc_size);
+	res_arena = ft_mal_find_available_arena(&current_arena, tid, alloc_size);
 	return (res_arena);
 }
