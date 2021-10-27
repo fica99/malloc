@@ -137,19 +137,32 @@ DEPS			:=		$(OBJS:.o=.d)
 # ------------  FLAGS  ------------------------------------------------------- #
 CC				:=		gcc
 RM				:=		rm -rf
-CFLGS			:=		-Wall -Werror -Wextra
+WFLGS			:=		-Wall -Werror -Wextra
+CFLGS			:=		
+DFLGS			:=		-O0 -g
+OFLGS			:=		-O2
 IFLGS			:=		-I $(HDR_DIR)
-DFLGS			:=		-MD -MP -O2
+# -MD deps with system headers,
+# -MP dummy deps for header files (in case removing .h file)
+DEPFLGS			:=		-MD -MP
 
 # ------------  RULES  ------------------------------------------------------- #
 
-.PHONY: all clean fclean re
+ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
+	CFLGS += $(DFLGS)
+else
+	CFLGS += $(WFLGS) $(OFLGS)
+endif
+
+.PHONY: all debug clean fclean re re_debug
 
 all: $(NAME)
 
+debug: $(NAME)
+
 -include $(DEPS)
 $(TMP_DIR)/%.o: $(SRC_DIR)/%.c | $(TMP_DIR)
-	$(CC) $(CFLGS) $(DFLGS) -c -o $@ $< $(IFLGS)
+	$(CC) $(DEPFLGS) $(CFLGS) -c -o $@ $< $(IFLGS)
 
 $(TMP_DIR):
 	mkdir -p $(TMP_DIR)
@@ -168,4 +181,6 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+re_debug: fclean debug
 

@@ -50,9 +50,11 @@ DEPS			:=		$(OBJS:.o=.d)
 # ------------  FLAGS  ------------------------------------------------------- #
 CC				:=		gcc
 RM				:=		rm -rf
+WFLGS			:=		-Wall -Werror -Wextra
 # -fPIC position independant code
-CFLGS			:=		-Wall -Werror -Wextra -fPIC
+CFLGS			:=		-fPIC
 DFLGS			:=		-O0 -g
+OFLGS			:=		-O2
 EFLGS			:=		
 IFLGS			:=		-I $(HDR_DIR) -I $(LFTPRINTF_HS_DIR)
 # -MD deps with system headers,
@@ -60,20 +62,31 @@ IFLGS			:=		-I $(HDR_DIR) -I $(LFTPRINTF_HS_DIR)
 DEPFLGS			:=		-MD -MP
 LFLGS			:=		-L $(LFTPRINTF_DIR) -lftprintf -lpthread -lm
 
+ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
+	CFLGS += $(DFLGS)
+else
+	CFLGS += $(WFLGS) $(OFLGS)
+endif
+
 # ------------  RULES  ------------------------------------------------------- #
-.PHONY: all clean fclean re
+.PHONY: all lib debug lib_debug clean fclean re re_debug
 
 all: lib $(NAME)
 
 lib:
 	$(MAKE) -C $(LFTPRINTF_DIR)
 
+debug: lib_debug $(NAME)
+
+lib_debug:
+	$(MAKE) -C $(LFTPRINTF_DIR) debug
+
 $(LFTPRINTF_DIR)/$(LFTPRINTF):
 	$(MAKE) -C $(LFTPRINTF_DIR)
 
 -include $(DEPS)
 $(TMP_DIR)/%.o: $(SRC_DIR)/%.c | $(TMP_DIR)
-	$(CC) $(DEPFLGS) $(EFLGS) $(CFLGS) $(DFLGS) -c -o $@ $< $(IFLGS)
+	$(CC) $(DEPFLGS) $(EFLGS) $(CFLGS) -c -o $@ $< $(IFLGS)
 
 $(TMP_DIR):
 	mkdir -p $(TMP_DIR)
@@ -93,3 +106,5 @@ fclean:
 	$(RM) $(LN_NAME) $(NAME)
 
 re: fclean all
+
+re_debug: fclean debug
