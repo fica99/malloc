@@ -35,7 +35,8 @@ SRC_FLS			:=		$(PRE_FLS)		\
 						ft_malloc.c		\
 						ft_realloc.c	\
 						ft_mal_arena.c	\
-						ft_mal_heap.c
+						ft_mal_heap.c	\
+						ft_mal_chunk.c
 
 # ------------  LIBFTPRINTF  ------------------------------------------------- #
 LFTPRINTF		:=		libftprintf.a

@@ -14,8 +14,20 @@
 /*
 *************************** User headers ************************************
 */
+
+/*
+*********** Precompiled header **************
+*/
 #include "ft_mal_precomp.h"
+
+/*
+*********** Arena header ********************
+*/
 #include "ft_mal_arena.h"
+
+/*
+*********** Heap header *********************
+*/
 #include "ft_mal_heap.h"
 
 
@@ -24,8 +36,8 @@
 */
 
 /*
-************* gettid *****************************
-************* syscall ****************************
+*********** gettid **************************
+*********** syscall *************************
 */
 #define _GNU_SOURCE
 #include <sys/syscall.h>
@@ -38,7 +50,7 @@
 */
 
 /*
-******************* Limits ***************************************
+*********** Limits ***************************
 */
 # define FT_MAL_MAX_NB_ARENAS 8
 # define FT_MAL_MAX_THREADS 410669
@@ -49,7 +61,7 @@
 */
 
 /*
-******************* Pointer to arenas ****************************
+*********** Pointer to arenas ****************
 */
 t_s_ft_mal_state	*g_ft_arena = NULL;
 
@@ -73,6 +85,9 @@ static t_s_ft_mal_state	*ft_mal_new_arena(size_t alloc_size)
 		return (NULL);
 	
 	arena = heap_info->ar_ptr;
+
+	// initialize arena
+	ft_bzero((void*)arena, sizeof(t_s_ft_mal_state));
 	
 	// check mutex initialization
 	if (pthread_mutex_init(&arena->mutex, NULL) != FT_MAL_SUCCESS)
@@ -119,7 +134,7 @@ static t_s_ft_mal_state	*ft_mal_get_saved_arena_tid(t_s_ft_mal_state *arena, pid
 	return (NULL);
 }
 
-static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena, pid_t tid, size_t alloc_size)
+static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena, size_t alloc_size)
 {
 	t_s_ft_mal_state	*res_arena;
 
@@ -152,27 +167,33 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena, p
 		}
 	}
 
-	// save tid for current arena
-	ft_mal_arena_tid(res_arena->arena_id, tid, true);
 	return (res_arena);
 }
 
 t_s_ft_mal_state		*ft_mal_get_available_arena(size_t alloc_size)
 {
-	t_s_ft_mal_state		*current_arena;
 	pid_t					tid;
 	t_s_ft_mal_state		*res_arena;
 
-	current_arena = g_ft_arena;
 	// get current thread id
 	tid = gettid();
 
 	// check saved tids for current arenas
-	res_arena = ft_mal_get_saved_arena_tid(current_arena, tid);
-	if (res_arena)
-		return (res_arena);
-
-	// find empty arena or create new
-	res_arena = ft_mal_find_available_arena(&current_arena, tid, alloc_size);
+	res_arena = ft_mal_get_saved_arena_tid(g_ft_arena, tid);
+	
+	// find empty arena or create new, if there is no saved arena for current thread
+	if (!res_arena)
+	{
+		res_arena = ft_mal_find_available_arena(&g_ft_arena, alloc_size);
+		
+		// save arena for current thread
+		ft_mal_arena_tid(res_arena->arena_id, tid, true);
+	}
+	
 	return (res_arena);
+}
+
+t_s_ft_mal_chunk		*ft_mal_get_available_chunk(t_s_ft_mal_state *arena, size_t alloc_size)
+{
+
 }

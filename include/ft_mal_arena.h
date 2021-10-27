@@ -12,14 +12,15 @@
 
 #ifndef FT_MAL_ARENA_H
 # define FT_MAL_ARENA_H
-/*
-*************************** System headers ************************************
-*/
-
 
 /*
-*************************** Macroses  *****************************************
+*************************** User headers ************************************
 */
+
+/*
+************* Chunk **********************
+*/
+# include "ft_mal_chunk.h"
 
 
 /*
@@ -27,7 +28,7 @@
 */
 
 /*
-******************* Malloc state (Arena header) *******************
+************* Malloc state (Arena header)
 */
 typedef struct				s_ft_mal_state
 {
@@ -37,20 +38,29 @@ typedef struct				s_ft_mal_state
 	/* ID of arena */
 	size_t					arena_id;
 	
+	/* Empty tiny chunks */
+	t_s_ft_mal_chunk		*free_tiny_chunks;
+
+	/* Empty small chunks */
+	t_s_ft_mal_chunk		*free_small_chunks;
+	
 	/* Linked list */
 	struct s_ft_mal_state	*next;
 }							t_s_ft_mal_state;
 
 # define FT_MAL_STATE_SIZE (sizeof(t_s_ft_mal_state))
 # define FT_MAL_STATE_SHIFT(start) ((void*)start + FT_MAL_STATE_SIZE)
+
+
 /*
 *************************** Functions ****************************************
 */
 
 /*
-******************** ft_mal_arena.c *****************************
+************* ft_mal_arena.c ******************
 */
 t_s_ft_mal_state			*ft_mal_get_available_arena(size_t alloc_size);
+t_s_ft_mal_chunk			*ft_mal_get_available_chunk(t_s_ft_mal_state *arena, size_t alloc_size);
 
 
 /*

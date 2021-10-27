@@ -10,8 +10,26 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+/*
+*************************** User headers ************************************
+*/
+
+/*
+*********** Precompiled header **************
+*/
 #include "ft_mal_precomp.h"
+
+/*
+*********** Heap header *********************
+*/
 #include "ft_mal_heap.h"
+
+/*
+*********** Chunk struct ********************
+*********** Chunk type **********************
+*/
+#include "ft_mal_chunk.h"
+
 
 /*
 *************************** System headers ************************************
@@ -22,7 +40,6 @@
 */
 # include <unistd.h>
 
-
 /*
 ******************* mmap ********************************
 ******************* munmap ******************************
@@ -32,19 +49,8 @@
 /*
 ******************* getrlimit ***************************
 */
-
 #include <sys/time.h>
 #include <sys/resource.h>
-
-
-/*
-*************************** User headers ************************************
-*/
-
-/*
-*************************** Chunk struct ***
-*/
-#include "ft_mal_chunk.h"
 
 
 /*
@@ -52,26 +58,18 @@
 */
 
 /*
-******************* Chunk sizes ************
-*/
-# define FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE 1
-# define FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE 256
-# define FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + 1)
-# define FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE 2048
-# define FT_MAL_LARGE_CHUNK_MIN_ALLOC_SIZE (FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + 1)
-
-/*
 *************************** Number of chunks in heap *********
 */
-# define FT_MAL_NB_OF_TINY_CHUNKS 120
+# define FT_MAL_NB_OF_TINY_CHUNKS 240
 # define FT_MAL_NB_OF_SMALL_CHUNKS 120
 
 
 static size_t			ft_mal_get_heap_total_size(size_t alloc_size, bool is_arena_included)
 {
-	size_t	total_size;
-	size_t	page_size;
-	size_t	nb_pages;
+	size_t					total_size;
+	size_t					page_size;
+	size_t					nb_pages;
+	t_e_ft_mal_chunk_type	chunk_type;
 
 	// determine pagesize
 	page_size = getpagesize();
@@ -84,12 +82,14 @@ static size_t			ft_mal_get_heap_total_size(size_t alloc_size, bool is_arena_incl
 		total_size += sizeof(t_s_ft_mal_state);
 
 	// check heap type
-	if (alloc_size >= FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE && alloc_size <= FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE)
-		total_size += ((FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_TINY_CHUNKS);
-	else if (alloc_size >= FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE && alloc_size <= FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE)
-		total_size += ((FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_SMALL_CHUNKS);
-	else
+	chunk_type = ft_mal_get_chunk_type_by_alloc_size(alloc_size);
+	
+	if (chunk_type == FT_MAL_LARGE_CHUNK_TYPE)
 		total_size += (alloc_size + sizeof(t_s_ft_mal_chunk));
+	else if (chunk_type == FT_MAL_SMALL_CHUNK_TYPE)
+		total_size += ((FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_SMALL_CHUNKS);
+	else if (chunk_type == FT_MAL_TINY_CHUNK_TYPE)
+		total_size += ((FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_TINY_CHUNKS);
 
 	// determine number of pages
 	nb_pages = total_size / page_size;
@@ -111,6 +111,7 @@ static rlim_t			ft_mal_get_memory_limit(void)
 t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size, bool is_arena_included)
 {
 	t_s_ft_mal_heap_info	*heap_info;
+	t_s_ft_mal_chunk		*first_chunk;
 	size_t					total_size;
 	
 	// determine heap size to allocate
@@ -129,10 +130,14 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size, bool is_arena_included)
 		return (NULL);
 
 	// initialize heap info
+	ft_bzero((void*)heap_info, sizeof(t_s_ft_mal_heap_info));
 	heap_info->total_size = total_size;
-	heap_info->next = NULL;
-	heap_info->prev = NULL;
 	heap_info->ar_ptr = (is_arena_included ? FT_MAL_HEAP_INFO_SHIFT(heap_info) : NULL);
+
+	// initialize first chunk
+	first_chunk = (is_arena_included ? FT_MAL_STATE_SHIFT(heap_info->ar_ptr) : FT_MAL_HEAP_INFO_SHIFT(heap_info));
+	ft_bzero((void*)first_chunk, sizeof(t_s_ft_mal_chunk));
+	first_chunk->size = total_size - (first_chunk - heap_info);
 
 	return (heap_info);
 }
