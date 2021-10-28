@@ -64,12 +64,11 @@
 # define FT_MAL_NB_OF_SMALL_CHUNKS 120
 
 
-static size_t			ft_mal_get_heap_total_size(size_t alloc_size, bool is_arena_included)
+static size_t			ft_mal_get_heap_total_size(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type)
 {
 	size_t					total_size;
 	size_t					page_size;
 	size_t					nb_pages;
-	t_e_ft_mal_chunk_type	chunk_type;
 
 	// determine pagesize
 	page_size = getpagesize();
@@ -78,18 +77,15 @@ static size_t			ft_mal_get_heap_total_size(size_t alloc_size, bool is_arena_incl
 	total_size = sizeof(t_s_ft_mal_heap_info);
 
 	// arena metadata
-	if (is_arena_included == true)
+	if (!arena)
 		total_size += sizeof(t_s_ft_mal_state);
-
-	// check heap type
-	chunk_type = ft_mal_get_chunk_type_by_alloc_size(alloc_size);
 	
-	if (chunk_type == FT_MAL_LARGE_CHUNK_TYPE)
-		total_size += (alloc_size + sizeof(t_s_ft_mal_chunk));
-	else if (chunk_type == FT_MAL_SMALL_CHUNK_TYPE)
+	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
+		total_size += (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE * FT_MAL_NB_OF_TINY_CHUNKS);
+	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
 		total_size += ((FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_SMALL_CHUNKS);
-	else if (chunk_type == FT_MAL_TINY_CHUNK_TYPE)
-		total_size += ((FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_TINY_CHUNKS);
+	else
+		total_size += (heap_type + sizeof(t_s_ft_mal_chunk));
 
 	// determine number of pages
 	nb_pages = total_size / page_size;
@@ -108,14 +104,86 @@ static rlim_t			ft_mal_get_memory_limit(void)
 	return (rpl.rlim_max);
 }
 
-t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size, bool is_arena_included)
+static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_heap_info *heap_info)
+{
+	void				*start;
+	size_t				i;
+	t_s_ft_mal_chunk	*current_chunk;
+	
+	// determine start of the memory 
+	start = FT_MAL_HEAP_INFO_SHIFT(heap_info);
+	if (start == arena)
+		start = FT_MAL_STATE_SHIFT(start);
+	
+	// initialize header
+	ft_bzero(start, sizeof(t_s_ft_mal_chunk));
+
+	current_chunk = start;
+
+	if (heap_info->heap_type == FT_MAL_TINY_HEAP_TYPE)
+	{
+		// add chunks from block to start of the list	
+		i = 0;
+		while (i + FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE < heap_info->total_size)
+		{
+			// initialize header
+			ft_bzero(start + i, sizeof(t_s_ft_mal_chunk));
+
+			current_chunk = start + i;
+
+			// assign next element
+			current_chunk->fd = arena->free_tiny_chunks;
+	
+			// assign previous element
+			if (arena->free_tiny_chunks)
+				arena->free_tiny_chunks->bk = current_chunk;
+				
+			arena->free_tiny_chunks = current_chunk;
+		
+			i += FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
+		}
+	}
+	else if (heap_info->heap_type == FT_MAL_SMALL_HEAP_TYPE)
+	{
+		// add one big chunk(size of block) to start of the list
+		
+		// assign size of the chunk
+		current_chunk->size = heap_info->total_size - (FT_MAL_CHUNK_SHIFT(start) - (void*)heap_info);
+
+		// assign next element
+		current_chunk->fd = arena->free_small_chunks;
+	
+		// assign previous element
+		if (arena->free_small_chunks)
+			arena->free_small_chunks->bk = current_chunk;
+
+		arena->free_small_chunks = current_chunk;
+	}
+	else
+	{
+		// add one big chunk to start of the list
+		
+		// assign size of the chunk
+		current_chunk->size = heap_info->heap_type;
+
+		// assign next element
+		current_chunk->fd = arena->free_large_chunks;
+	
+		// assign previous element
+		if (arena->free_large_chunks)
+			arena->free_large_chunks->bk = current_chunk;
+
+		arena->free_large_chunks = current_chunk;
+	}
+}
+
+t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type)
 {
 	t_s_ft_mal_heap_info	*heap_info;
-	t_s_ft_mal_chunk		*first_chunk;
-	size_t					total_size;
+	size_t					total_size; // calculate sum of allocated memory
 	
 	// determine heap size to allocate
-	total_size = ft_mal_get_heap_total_size(alloc_size, is_arena_included);
+	total_size = ft_mal_get_heap_total_size(arena, heap_type);
 	
 	// check enough memory
 	if (total_size > ft_mal_get_memory_limit())
@@ -132,12 +200,19 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(size_t alloc_size, bool is_arena_included)
 	// initialize heap info
 	ft_bzero((void*)heap_info, sizeof(t_s_ft_mal_heap_info));
 	heap_info->total_size = total_size;
-	heap_info->ar_ptr = (is_arena_included ? FT_MAL_HEAP_INFO_SHIFT(heap_info) : NULL);
+	heap_info->heap_type = heap_type;
 
-	// initialize first chunk
-	first_chunk = (is_arena_included ? FT_MAL_STATE_SHIFT(heap_info->ar_ptr) : FT_MAL_HEAP_INFO_SHIFT(heap_info));
-	ft_bzero((void*)first_chunk, sizeof(t_s_ft_mal_chunk));
-	first_chunk->size = total_size - (first_chunk - heap_info);
+	if (!arena)
+	{
+		// if not exist, initialize it
+		arena = FT_MAL_HEAP_INFO_SHIFT(heap_info);
+		ft_bzero(arena, sizeof(t_s_ft_mal_state));
+	}
+	
+	heap_info->ar_ptr = arena;
+
+	// add new free chunks to lists
+	ft_mal_add_new_empty_chunks(heap_info->ar_ptr, heap_info);
 
 	return (heap_info);
 }

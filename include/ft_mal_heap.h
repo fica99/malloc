@@ -24,6 +24,19 @@
 
 
 /*
+*************************** Enums **********************************************
+*/
+
+/*
+******** Heap type **************
+*/
+typedef enum	e_ft_mal_heap_type
+{
+	FT_MAL_TINY_HEAP_TYPE,
+	FT_MAL_SMALL_HEAP_TYPE,
+}				t_e_ft_mal_heap_type;
+
+/*
 *************************** Structures *****************************************
 */
 
@@ -36,6 +49,7 @@ typedef struct					s_ft_mal_heap_info
 	struct s_ft_mal_heap_info	*next;		/* Next heap. */
 	struct s_ft_mal_heap_info	*prev;		/* Previous heap. */
 	size_t						total_size;	/* Total size of the heap. */
+	t_e_ft_mal_heap_type		heap_type;	/* Heap type or size of the large block*/
 }								t_s_ft_mal_heap_info;
 
 # define FT_MAL_HEAP_INFO_SIZE (sizeof(t_s_ft_mal_heap_info))
@@ -47,7 +61,7 @@ typedef struct					s_ft_mal_heap_info
 /*
 ******************** ft_mal_heap.c *****************************
 */
-t_s_ft_mal_heap_info			*ft_mal_new_heap(size_t alloc_size, bool is_arena_included);
+t_s_ft_mal_heap_info			*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type);
 int								ft_mal_free_heap(t_s_ft_mal_heap_info *heap);
 #endif
 

@@ -3,7 +3,9 @@
 #include <stdio.h>
 int	main(void)
 {
-	int *a = malloc(100);
+	int *a = malloc(0);
+	
+	a = malloc(100);
 	//printf("Hello %ls\n", a);
 	free(a);
 	a = malloc(1000);

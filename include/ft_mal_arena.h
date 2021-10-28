@@ -39,11 +39,14 @@ typedef struct				s_ft_mal_state
 	size_t					arena_id;
 	
 	/* Empty tiny chunks */
-	t_s_ft_mal_chunk		*free_tiny_chunks;
+	t_s_ft_mal_chunk		*free_tiny_chunks; // use pool allocator
 
 	/* Empty small chunks */
-	t_s_ft_mal_chunk		*free_small_chunks;
+	t_s_ft_mal_chunk		*free_small_chunks; // use free list allocator
 	
+	/* Empty large chunks */
+	t_s_ft_mal_chunk		*free_large_chunks; 
+
 	/* Linked list */
 	struct s_ft_mal_state	*next;
 }							t_s_ft_mal_state;
@@ -59,8 +62,7 @@ typedef struct				s_ft_mal_state
 /*
 ************* ft_mal_arena.c ******************
 */
-t_s_ft_mal_state			*ft_mal_get_available_arena(size_t alloc_size);
-t_s_ft_mal_chunk			*ft_mal_get_available_chunk(t_s_ft_mal_state *arena, size_t alloc_size);
+t_s_ft_mal_state			*ft_mal_get_available_arena(void);
 
 
 /*
