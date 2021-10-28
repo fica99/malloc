@@ -22,6 +22,12 @@
 */
 # include "ft_mal_chunk.h"
 
+/*
+*********** Heaps *************************
+*/
+#include "ft_mal_heap.h"
+typedef struct s_ft_mal_heap_info t_s_ft_mal_heap_info;
+
 
 /*
 *************************** Structures ****************************************
@@ -37,15 +43,18 @@ typedef struct				s_ft_mal_state
 
 	/* ID of arena */
 	size_t					arena_id;
+
+	/* Heaps of arena */
+	t_s_ft_mal_heap_info	*heaps;
 	
 	/* Empty tiny chunks */
-	t_s_ft_mal_chunk		*free_tiny_chunks; // use pool allocator
+	t_s_ft_mal_chunk		*free_tiny_chunks;	// use pool allocator
 
 	/* Empty small chunks */
-	t_s_ft_mal_chunk		*free_small_chunks; // use free list allocator
+	t_s_ft_mal_chunk		*free_small_chunks;	// use free list allocator
 	
 	/* Empty large chunks */
-	t_s_ft_mal_chunk		*free_large_chunks; 
+	t_s_ft_mal_chunk		*free_large_chunks;	// using for tempory large chunks
 
 	/* Linked list */
 	struct s_ft_mal_state	*next;
@@ -63,6 +72,7 @@ typedef struct				s_ft_mal_state
 ************* ft_mal_arena.c ******************
 */
 t_s_ft_mal_state			*ft_mal_get_available_arena(void);
+void						*ft_mal_allocate_memory_from_arena(t_s_ft_mal_state *arena, size_t alloc_size);
 
 
 /*

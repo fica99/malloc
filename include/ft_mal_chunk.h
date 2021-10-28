@@ -36,10 +36,16 @@
 */
 typedef struct				s_ft_mal_chunk
 {
-	size_t					size;			/* Size in bytes, including overhead. */
+	/* Size in bytes, excluding header */
+	size_t					size;
 
-	struct s_ft_mal_chunk*	fd;				/* double links -- used only if free. */
-	struct s_ft_mal_chunk*	bk;
+	/* double links -- used only if free. */
+	
+	/* Next chunk. */
+	struct s_ft_mal_chunk*	next;
+	
+	/* Previous chunk. */
+	struct s_ft_mal_chunk*	prev;
 }							t_s_ft_mal_chunk;
 # define FT_MAL_CHUNK_SIZE (sizeof(t_s_ft_mal_chunk))
 # define FT_MAL_CHUNK_SHIFT(start) ((void*)start + FT_MAL_CHUNK_SIZE)

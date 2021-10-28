@@ -29,10 +29,6 @@
 */
 #include "ft_mal_chunk.h"
 
-static void	ft_mal_remove_large_chunk_heap(t_s_ft_mal_chunk *chunk)
-{
-
-}
 
 void		free(void *ptr)
 {

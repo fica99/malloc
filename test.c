@@ -4,7 +4,7 @@
 int	main(void)
 {
 	int *a = malloc(0);
-	
+	free(a);
 	a = malloc(100);
 	//printf("Hello %ls\n", a);
 	free(a);

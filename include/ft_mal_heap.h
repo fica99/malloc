@@ -21,7 +21,7 @@
 ******************* Malloc state ******************************
 */
 # include "ft_mal_arena.h"
-
+typedef struct s_ft_mal_state t_s_ft_mal_state;
 
 /*
 *************************** Enums **********************************************
@@ -34,6 +34,7 @@ typedef enum	e_ft_mal_heap_type
 {
 	FT_MAL_TINY_HEAP_TYPE,
 	FT_MAL_SMALL_HEAP_TYPE,
+	FT_MAL_LARGE_HEAP_TYPE
 }				t_e_ft_mal_heap_type;
 
 /*
@@ -45,11 +46,20 @@ typedef enum	e_ft_mal_heap_type
 */
 typedef struct					s_ft_mal_heap_info
 {
-	t_s_ft_mal_state			*ar_ptr;	/* Arena for this heap. */
-	struct s_ft_mal_heap_info	*next;		/* Next heap. */
-	struct s_ft_mal_heap_info	*prev;		/* Previous heap. */
-	size_t						total_size;	/* Total size of the heap. */
-	t_e_ft_mal_heap_type		heap_type;	/* Heap type or size of the large block*/
+	/* Arena for this heap. */
+	t_s_ft_mal_state			*ar_ptr;
+
+	/* Next heap. */
+	struct s_ft_mal_heap_info	*next;
+
+	/* Previous heap. */
+	struct s_ft_mal_heap_info	*prev;
+
+	/* Total size of the heap. */
+	size_t						total_size;
+
+	/* Heap type*/
+	t_e_ft_mal_heap_type		heap_type;
 }								t_s_ft_mal_heap_info;
 
 # define FT_MAL_HEAP_INFO_SIZE (sizeof(t_s_ft_mal_heap_info))
@@ -61,7 +71,8 @@ typedef struct					s_ft_mal_heap_info
 /*
 ******************** ft_mal_heap.c *****************************
 */
-t_s_ft_mal_heap_info			*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type);
+t_s_ft_mal_heap_info			*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type, size_t large_chunk_size);
 int								ft_mal_free_heap(t_s_ft_mal_heap_info *heap);
+t_e_ft_mal_heap_type			ft_mal_get_heap_type_by_alloc_size(size_t alloc_size);
 #endif
 

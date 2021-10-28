@@ -33,6 +33,7 @@
 void	*malloc(size_t size)
 {
 	t_s_ft_mal_state	*arena;
+	void				*ptr;
 
 	// get available arena (locking mutex)
 	arena = ft_mal_get_available_arena();
@@ -40,8 +41,11 @@ void	*malloc(size_t size)
 	// error happened
 	if (!arena)
 		return (NULL);
-	
+
+	ptr = ft_mal_allocate_memory_from_arena(arena, size);
+
+	// unlock mutex after allocating the memory
 	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 
-	return (NULL);	
+	return (ptr);	
 }
