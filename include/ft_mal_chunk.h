@@ -14,7 +14,7 @@
 # define FT_MAL_CHUNK_H
 
 /*
-*************************** Macroses ********************************************
+*************************** Macroses *****************************************
 */
 
 /*
@@ -28,11 +28,11 @@
 
 
 /*
-*************************** Structures ****************************************
+*************************** Structures **************************************
 */
 
 /*
-******** malloc_chunk (chunk representations)
+******** chunk representation ****
 */
 typedef struct				s_ft_mal_chunk
 {
@@ -47,6 +47,7 @@ typedef struct				s_ft_mal_chunk
 	/* Previous chunk. */
 	struct s_ft_mal_chunk*	prev;
 }							t_s_ft_mal_chunk;
+
 # define FT_MAL_CHUNK_SIZE (sizeof(t_s_ft_mal_chunk))
 # define FT_MAL_CHUNK_SHIFT(start) ((void*)start + FT_MAL_CHUNK_SIZE)
 # define FT_MAL_CHUNK_BACK_SHIFT(start) ((void*)start - FT_MAL_CHUNK_SIZE)

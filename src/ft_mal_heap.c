@@ -32,33 +32,33 @@
 
 
 /*
-*************************** System headers ************************************
+*************************** System headers **********************************
 */
 
 /*
-******************* getpagesize *************************
+*********** getpagesize *************************
 */
 # include <unistd.h>
 
 /*
-******************* mmap ********************************
-******************* munmap ******************************
+*********** mmap ********************************
+*********** munmap ******************************
 */
 #include <sys/mman.h>
 
 /*
-******************* getrlimit ***************************
+*********** getrlimit ***************************
 */
 #include <sys/time.h>
 #include <sys/resource.h>
 
 
 /*
-*************************** Macroses ********************************************
+*************************** Macroses ****************************************
 */
 
 /*
-*************************** Number of chunks in heap *********
+*********** Number of chunks in heap ************
 */
 # define FT_MAL_NB_OF_TINY_CHUNKS 240
 # define FT_MAL_NB_OF_SMALL_CHUNKS 120
@@ -131,7 +131,7 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 
 			current_chunk = start + i;
 
-			// add chunk to tiny chunks list
+			// add chunk to start of tiny chunks list
 
 			// assign next element
 			current_chunk->next = arena->free_tiny_chunks;
@@ -182,16 +182,32 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 	}
 }
 
+// add new heap to start of the heaps list
+static void				ft_mal_add_new_heap(t_s_ft_mal_state *arena, t_s_ft_mal_heap_info *heap_info)
+{
+	// assign next element
+	heap_info->next = arena->heaps;
+	
+	// assign previous element
+	if (arena->heaps)
+		arena->heaps->prev = heap_info;
+	
+	// add element to the start of the list
+	arena->heaps = heap_info;
+}
+
+// allocate new different types of heap (with or without arena)
 t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_type heap_type, size_t large_chunk_size)
 {
 	t_s_ft_mal_heap_info	*heap_info;
-	size_t					total_size; // calculate sum of allocated memory
+	size_t					total_size;
+	static size_t			allocated_memory_size;
 	
 	// determine heap size to allocate
 	total_size = ft_mal_get_heap_total_size(arena, heap_type, large_chunk_size);
 	
 	// check enough memory
-	if (total_size > ft_mal_get_memory_limit())
+	if (allocated_memory_size + total_size> ft_mal_get_memory_limit())
 		return (NULL);
 
 	// allocate heap
@@ -201,6 +217,9 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_t
 	// error check
 	if (heap_info == MAP_FAILED)
 		return (NULL);
+
+	// add allocated memory
+	allocated_memory_size += total_size;
 
 	// initialize heap info
 	ft_bzero((void*)heap_info, sizeof(t_s_ft_mal_heap_info));
@@ -216,16 +235,43 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_t
 	
 	heap_info->ar_ptr = arena;
 
+	// add allocated heap to heap list
+	ft_mal_add_new_heap(arena, heap_info);
+
 	// add new free chunks to lists
 	ft_mal_add_new_empty_chunks(heap_info->ar_ptr, heap_info);
 
 	return (heap_info);
 }
 
-int					ft_mal_free_heap(t_s_ft_mal_heap_info *heap)
+// remove heap from list and free it
+int					ft_mal_free_heap(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap)
 {
+	t_s_ft_mal_heap_info	*next;
+	t_s_ft_mal_heap_info	*prev;
+
 	if (heap)
+	{
+		// remove heap from the list
+
+		next = heap->next;
+		prev = heap->prev;
+
+		// update next element
+		if (next)
+			next->prev = prev;
+
+		// update previous element
+		if (prev)
+			prev->next = next;
+
+		// if heap is head, remove it
+		if (*head == heap)
+			*head = next;
+
+		// free heap total size
 		return (munmap((void*)heap, heap->total_size)); // return function status
+	}
 	return (FT_MAL_SUCCESS);
 }
 
