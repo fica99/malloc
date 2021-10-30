@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:00:31 by marvin            #+#    #+#             */
-/*   Updated: 2021/10/30 15:11:38 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 22:35:29 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,4 +62,6 @@ typedef struct				s_ft_mal_chunk
 */
 void	ft_mal_add_chunk_to_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
 void	ft_mal_remove_chunk_from_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
+void	ft_mal_merge_chunks(t_s_ft_mal_chunk *chunks);
+void	ft_mal_sort_list(t_s_ft_mal_chunk **head);
 #endif

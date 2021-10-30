@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 11:48:42 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 15:10:34 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 16:26:34 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ typedef struct					s_ft_mal_heap_info
 
 # define FT_MAL_HEAP_INFO_SIZE (sizeof(t_s_ft_mal_heap_info))
 # define FT_MAL_HEAP_INFO_SHIFT(start) ((void*)start + FT_MAL_HEAP_INFO_SIZE)
+# define FT_MAL_HEAP_INFO_BACK_SHIFT(start) ((void*)start - FT_MAL_HEAP_INFO_SIZE)
+
 
 /*
 *************************** Functions ****************************************
@@ -77,6 +79,6 @@ t_s_ft_mal_heap_info			*ft_mal_new_heap(t_s_ft_mal_state *arena,
 									t_e_ft_mal_heap_type heap_type, size_t large_chunk_size);
 int								ft_mal_free_heap(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap);
 t_e_ft_mal_heap_type			ft_mal_get_heap_type_by_alloc_size(size_t alloc_size);
-t_e_ft_mal_heap_type			ft_mal_get_heap_type_ptr(void *ptr);
+t_e_ft_mal_heap_type			ft_mal_get_heap_type_by_ptr(void *ptr);
 #endif
 

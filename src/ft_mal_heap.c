@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 15:26:07 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 16:26:23 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,7 +265,7 @@ t_e_ft_mal_heap_type	ft_mal_get_heap_type_by_alloc_size(size_t alloc_size)
 	return (FT_MAL_LARGE_HEAP_TYPE);
 }
 
-t_e_ft_mal_heap_type	ft_mal_get_heap_type_ptr(void *ptr)
+t_e_ft_mal_heap_type	ft_mal_get_heap_type_by_ptr(void *ptr)
 {
 	t_s_ft_mal_chunk	*chunk;
 
