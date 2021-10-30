@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/21 16:23:18 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 13:29:30 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,9 +195,10 @@ t_s_ft_mal_state		*ft_mal_get_available_arena(void)
 	return (res_arena);
 }
 
-static void	*ft_mal_allocate_memory_from_arena_tiny(t_s_ft_mal_state *arena)
+static void	*ft_mal_allocate_tiny_chunk(t_s_ft_mal_state *arena)
 {
 	t_s_ft_mal_heap_info	*heap_info;
+	t_s_ft_mal_chunk		*chunk;
 	void					*ptr;
 
 	// if there is no tiny chunk, we should allocate new heap
@@ -211,7 +212,10 @@ static void	*ft_mal_allocate_memory_from_arena_tiny(t_s_ft_mal_state *arena)
 	}
 
 	// assign pointer
-	ptr = arena->free_tiny_chunks;
+	ptr = NULL;
+	chunk = arena->free_tiny_chunks;
+	if (chunk && chunk->size >= FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE)
+		ptr = FT_MAL_CHUNK_SHIFT(chunk);
 
 	// remove chunk from list of empty tiny chunks
 	if (ptr)
@@ -266,14 +270,17 @@ static t_s_ft_mal_chunk		*ft_mal_get_first_fit_small_chunk(t_s_ft_mal_chunk **ch
 		{
 			// remove current chunk from the list and create next element
 
-			// next chunk initialization
-			tmp_chunk = (void*)current_chunk + alloc_size;
+			// next chunk initialization and adding it to list
+			tmp_chunk = (void*)FT_MAL_CHUNK_SHIFT(current_chunk) + alloc_size;
 			ft_bzero((void*)tmp_chunk, sizeof(t_s_ft_mal_chunk));
-			tmp_chunk->size = current_chunk->size - alloc_size;
+			tmp_chunk->size = current_chunk->size - (alloc_size + sizeof(t_s_ft_mal_chunk));
 			tmp_chunk->prev = current_chunk;
 			tmp_chunk->next = current_chunk->next;
+			if (tmp_chunk->next)
+				tmp_chunk->next->prev = tmp_chunk;
 			
 			// change current_chunk next element to remove it correctly
+			current_chunk->size = alloc_size;
 			current_chunk->next = tmp_chunk;
 
 			// remove current chunk from the list
@@ -287,7 +294,7 @@ static t_s_ft_mal_chunk		*ft_mal_get_first_fit_small_chunk(t_s_ft_mal_chunk **ch
 }
 
 // allocate memory from small chunks list
-static void	*ft_mal_allocate_memory_from_arena_small(t_s_ft_mal_state *arena, size_t alloc_size)
+static void	*ft_mal_allocate_small_chunk(t_s_ft_mal_state *arena, size_t alloc_size)
 {
 	t_s_ft_mal_heap_info	*heap_info;
 	t_s_ft_mal_chunk		*chunk;
@@ -309,13 +316,43 @@ static void	*ft_mal_allocate_memory_from_arena_small(t_s_ft_mal_state *arena, si
 
 	// assign pointer
 	ptr = NULL;
-	if (chunk)
-		ptr = (void*)chunk;
+	if (chunk && chunk->size >= alloc_size)
+		ptr = FT_MAL_CHUNK_SHIFT(chunk);
 	
 	return (ptr);
 }
 
-static void	*ft_mal_allocate_memory_from_arena_large(t_s_ft_mal_state *arena, size_t alloc_size)
+// merge small continious blocks in one
+static void	ft_mal_merge_small_chunks(t_s_ft_mal_chunk *free_small_chunks)
+{
+	t_s_ft_mal_chunk	*current;
+	t_s_ft_mal_chunk	*next;
+
+	current = free_small_chunks;
+	while (current)
+	{
+		// next element
+		next = current->next;
+		if (next)
+		{
+			// if blocks are connected, we can merge it
+			if (FT_MAL_CHUNK_SHIFT(current) + current->size == (void*)next)
+			{
+				// merge size and header
+				current->size += (next->size + sizeof(t_s_ft_mal_chunk));
+				
+				// remove merged element from list
+				// we sending pointer to head, but head element cannot be removed
+				ft_mal_remove_small_chunk_from_list(&free_small_chunks, next);
+				
+				continue;
+			}
+		}
+		current = next;
+	}
+}
+
+static void	*ft_mal_allocate_large_chunk(t_s_ft_mal_state *arena, size_t alloc_size)
 {
 	t_s_ft_mal_heap_info	*heap_info;
 	t_s_ft_mal_chunk		*chunk;
@@ -362,14 +399,15 @@ void		*ft_mal_allocate_memory_from_arena(t_s_ft_mal_state *arena, size_t alloc_s
 
 	ptr = NULL;
 	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
-		ptr = ft_mal_allocate_memory_from_arena_tiny(arena);
+		ptr = ft_mal_allocate_tiny_chunk(arena);
 	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
 	{
-		//add merge small blocks
-		ptr = ft_mal_allocate_memory_from_arena_small(arena, alloc_size);
+		// merge small continious blocks in one
+		ft_mal_merge_small_chunks(arena->free_small_chunks);
+		ptr = ft_mal_allocate_small_chunk(arena, alloc_size);
 	}
 	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
-		ptr = ft_mal_allocate_memory_from_arena_large(arena, alloc_size);
+		ptr = ft_mal_allocate_large_chunk(arena, alloc_size);
 
 	return ptr;
 }

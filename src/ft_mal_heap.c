@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_mal_arena.c                                     :+:      :+:    :+:   */
+/*   ft_mal_heap.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/21 16:23:18 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 12:09:29 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ static size_t			ft_mal_get_heap_total_size(t_s_ft_mal_state *arena,
 		total_size += sizeof(t_s_ft_mal_state);
 	
 	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
-		total_size += (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE * FT_MAL_NB_OF_TINY_CHUNKS);
+		total_size += ((FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_TINY_CHUNKS);
 	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
 		total_size += ((FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)) * FT_MAL_NB_OF_SMALL_CHUNKS);
 	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
@@ -124,12 +124,15 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 	{
 		// add chunks from block to tiny chunks list
 		i = 0;
-		while (i + FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE < heap_info->total_size)
+		while (i + (sizeof(t_s_ft_mal_chunk)
+			+ FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE) < heap_info->total_size)
 		{
 			// initialize header
 			ft_bzero(start + i, sizeof(t_s_ft_mal_chunk));
 
 			current_chunk = start + i;
+
+			current_chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
 
 			// add chunk to start of tiny chunks list
 
@@ -143,7 +146,7 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 			// add element to the start of the list
 			arena->free_tiny_chunks = current_chunk;
 		
-			i += FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
+			i += (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk));
 		}
 	}
 	else if (heap_info->heap_type == FT_MAL_SMALL_HEAP_TYPE)
