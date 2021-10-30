@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 10:34:03 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/21 10:34:03 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 16:08:48 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,12 @@ typedef struct				s_ft_mal_state
 /*
 ************* ft_mal_arena.c ******************
 */
+t_s_ft_mal_state			*ft_mal_get_saved_arena(void);
 t_s_ft_mal_state			*ft_mal_get_available_arena(void);
-void						*ft_mal_allocate_memory_from_arena(t_s_ft_mal_state *arena,
+void						*ft_mal_allocate_memory(t_s_ft_mal_state *arena,
 								size_t alloc_size);
+void						ft_mal_free_memory(t_s_ft_mal_state *arena,
+								void *ptr);
 
 
 /*

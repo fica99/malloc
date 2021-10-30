@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 12:09:29 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 15:26:07 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,16 +135,7 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 			current_chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
 
 			// add chunk to start of tiny chunks list
-
-			// assign next element
-			current_chunk->next = arena->free_tiny_chunks;
-	
-			// assign previous element
-			if (arena->free_tiny_chunks)
-				arena->free_tiny_chunks->prev = current_chunk;
-				
-			// add element to the start of the list
-			arena->free_tiny_chunks = current_chunk;
+			ft_mal_add_chunk_to_list(&arena->free_tiny_chunks, current_chunk);
 		
 			i += (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk));
 		}
@@ -156,15 +147,7 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 		// assign size of the chunk
 		current_chunk->size = heap_info->total_size - (FT_MAL_CHUNK_SHIFT(start) - (void*)heap_info);
 
-		// assign next element
-		current_chunk->next = arena->free_small_chunks;
-	
-		// assign previous element
-		if (arena->free_small_chunks)
-			arena->free_small_chunks->prev = current_chunk;
-
-		// add element to the start of the list
-		arena->free_small_chunks = current_chunk;
+		ft_mal_add_chunk_to_list(&arena->free_small_chunks, current_chunk);
 	}
 	else
 	{
@@ -173,30 +156,44 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 		// assign size of the chunk
 		current_chunk->size = heap_info->total_size - (FT_MAL_CHUNK_SHIFT(start) - (void*)heap_info);
 
-		// assign next element
-		current_chunk->next = arena->free_large_chunks;
-	
-		// assign previous element
-		if (arena->free_large_chunks)
-			arena->free_large_chunks->prev = current_chunk;
-
-		// add element to the start of the list
-		arena->free_large_chunks = current_chunk;
+		ft_mal_add_chunk_to_list(&arena->free_large_chunks, current_chunk);
 	}
 }
 
 // add new heap to start of the heaps list
-static void				ft_mal_add_new_heap(t_s_ft_mal_state *arena, t_s_ft_mal_heap_info *heap_info)
+static void		ft_mal_add_heap_to_list(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap)
 {
 	// assign next element
-	heap_info->next = arena->heaps;
+	heap->next = *head;
 	
 	// assign previous element
-	if (arena->heaps)
-		arena->heaps->prev = heap_info;
+	if (*head)
+		(*head)->prev = heap;
 	
 	// add element to the start of the list
-	arena->heaps = heap_info;
+	*head = heap;
+}
+
+// remove heap from the list
+static void		ft_mal_remove_heap_from_list(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap)
+{
+	t_s_ft_mal_heap_info	*next;
+	t_s_ft_mal_heap_info	*prev;
+	
+	next = heap->next;
+	prev = heap->prev;
+
+	// update next element
+	if (next)
+		next->prev = prev;
+
+	// update previous element
+	if (prev)
+		prev->next = next;
+
+	// if heap is head, remove it
+	if (*head == heap)
+		*head = next;
 }
 
 // allocate new different types of heap (with or without arena)
@@ -239,7 +236,7 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_t
 	heap_info->ar_ptr = arena;
 
 	// add allocated heap to heap list
-	ft_mal_add_new_heap(arena, heap_info);
+	ft_mal_add_heap_to_list(&arena->heaps, heap_info);
 
 	// add new free chunks to lists
 	ft_mal_add_new_empty_chunks(heap_info->ar_ptr, heap_info);
@@ -250,28 +247,9 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_t
 // remove heap from list and free it
 int					ft_mal_free_heap(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap)
 {
-	t_s_ft_mal_heap_info	*next;
-	t_s_ft_mal_heap_info	*prev;
-
 	if (heap)
 	{
-		// remove heap from the list
-
-		next = heap->next;
-		prev = heap->prev;
-
-		// update next element
-		if (next)
-			next->prev = prev;
-
-		// update previous element
-		if (prev)
-			prev->next = next;
-
-		// if heap is head, remove it
-		if (*head == heap)
-			*head = next;
-
+		ft_mal_remove_heap_from_list(head, heap);
 		// free heap total size
 		return (munmap((void*)heap, heap->total_size)); // return function status
 	}
@@ -286,3 +264,12 @@ t_e_ft_mal_heap_type	ft_mal_get_heap_type_by_alloc_size(size_t alloc_size)
 		return (FT_MAL_SMALL_HEAP_TYPE);
 	return (FT_MAL_LARGE_HEAP_TYPE);
 }
+
+t_e_ft_mal_heap_type	ft_mal_get_heap_type_ptr(void *ptr)
+{
+	t_s_ft_mal_chunk	*chunk;
+
+	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+	return (ft_mal_get_heap_type_by_alloc_size(chunk->size));
+}
+

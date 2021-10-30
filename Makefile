@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 17:48:31 by marvin            #+#    #+#              #
-#    Updated: 2021/10/18 17:48:31 by marvin           ###   ########.fr        #
+#    Updated: 2021/10/30 15:11:07 by aashara-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ PRE_FLS			:=		ft_mal_precomp.c
 SRC_FLS			:=		$(PRE_FLS)		\
 						ft_mal_arena.c	\
 						ft_mal_heap.c	\
+						ft_mal_chunk.c	\
 						ft_free.c		\
 						ft_malloc.c		\
 						ft_realloc.c	\

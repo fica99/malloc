@@ -5,13 +5,13 @@
 
 int	main(void)
 {
-	void	*a = malloc(1024);
+	// void	*a = malloc(1024);
 
-	ft_bzero(a, 100);
-	free(a);
-	// int *a = malloc(0);
-	// printf("Hello %ls\n", a);
+	// ft_bzero(a, 100);
 	// free(a);
+	int *a = malloc(0);
+	printf("Hello %ls\n", a);
+	free(a);
 	// a = malloc(100);
 	// printf("Hello %ls\n", a);
 	// free(a);

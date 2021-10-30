@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_mal_chunk.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:00:31 by marvin            #+#    #+#             */
-/*   Updated: 2021/10/19 17:00:31 by marvin           ###   ########.fr       */
+/*   Updated: 2021/10/30 15:11:38 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,4 +51,15 @@ typedef struct				s_ft_mal_chunk
 # define FT_MAL_CHUNK_SIZE (sizeof(t_s_ft_mal_chunk))
 # define FT_MAL_CHUNK_SHIFT(start) ((void*)start + FT_MAL_CHUNK_SIZE)
 # define FT_MAL_CHUNK_BACK_SHIFT(start) ((void*)start - FT_MAL_CHUNK_SIZE)
+
+
+/*
+*************************** Functions ****************************************
+*/
+
+/*
+******************** ft_mal_chunk.c *****************************
+*/
+void	ft_mal_add_chunk_to_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
+void	ft_mal_remove_chunk_from_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
 #endif

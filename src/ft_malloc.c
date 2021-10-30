@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/21 15:58:58 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/30 16:10:42 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	*malloc(size_t size)
 	if (!arena)
 		return (NULL);
 
-	ptr = ft_mal_allocate_memory_from_arena(arena, size);
+	ptr = ft_mal_allocate_memory(arena, size);
 
 	// unlock mutex after allocating the memory
 	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
