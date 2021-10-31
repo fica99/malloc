@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 16:20:08 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/31 21:39:18 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,5 +50,4 @@ void		free(void *ptr)
 
 	// unlock mutex after allocating the memory
 	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
-	
 }

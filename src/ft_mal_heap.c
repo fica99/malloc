@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 16:26:23 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/31 22:09:33 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,7 @@ t_s_ft_mal_heap_info	*ft_mal_new_heap(t_s_ft_mal_state *arena, t_e_ft_mal_heap_t
 	total_size = ft_mal_get_heap_total_size(arena, heap_type, large_chunk_size);
 	
 	// check enough memory
-	if (allocated_memory_size + total_size> ft_mal_get_memory_limit())
+	if (allocated_memory_size + total_size > ft_mal_get_memory_limit())
 		return (NULL);
 
 	// allocate heap

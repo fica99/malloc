@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 22:36:04 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/31 22:45:17 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ t_s_ft_mal_state		*ft_mal_get_available_arena(void)
 }
 
 // allocate memory from tiny chunks list
-static void	*ft_mal_allocate_tiny_chunk(t_s_ft_mal_state *arena)
+static void	*ft_mal_allocate_tiny_chunk(t_s_ft_mal_state *arena, size_t alloc_size)
 {
 	t_s_ft_mal_heap_info	*heap_info;
 	t_s_ft_mal_chunk		*chunk;
@@ -230,12 +230,16 @@ static void	*ft_mal_allocate_tiny_chunk(t_s_ft_mal_state *arena)
 	// assign pointer
 	ptr = NULL;
 	chunk = arena->free_tiny_chunks;
-	if (chunk && chunk->size >= FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE)
+	if (chunk && chunk->size >= alloc_size)
+	{
+		// assign alloc size
+		chunk->size = alloc_size;
+		
 		ptr = FT_MAL_CHUNK_SHIFT(chunk);
 
-	// remove chunk from list of empty tiny chunks
-	if (ptr)
+		// remove chunk from list of empty tiny chunks
 		ft_mal_remove_chunk_from_list(&arena->free_tiny_chunks, chunk);
+	}
 	
 	return (ptr);
 }
@@ -306,7 +310,7 @@ static void	*ft_mal_allocate_small_chunk(t_s_ft_mal_state *arena, size_t alloc_s
 
 	// assign pointer
 	ptr = NULL;
-	if (chunk && chunk->size >= alloc_size)
+	if (chunk && chunk->size == alloc_size)
 		ptr = FT_MAL_CHUNK_SHIFT(chunk);
 	
 	return (ptr);
@@ -319,25 +323,26 @@ static void	*ft_mal_allocate_large_chunk(t_s_ft_mal_state *arena, size_t alloc_s
 	t_s_ft_mal_chunk		*chunk;
 	void					*ptr;
 
-	// if there is no large chunk, we should allocate new heap
-	if (!arena->free_large_chunks)
-	{
-		heap_info = ft_mal_new_heap(arena, FT_MAL_LARGE_HEAP_TYPE, alloc_size);
+	// we should allocate new heap
+	heap_info = ft_mal_new_heap(arena, FT_MAL_LARGE_HEAP_TYPE, alloc_size);
 	
-		// error check
-		if (!heap_info)
-			return (NULL);
-	}
+	// error check
+	if (!heap_info)
+		return (NULL);
 
 	// assign pointer
 	ptr = NULL;
 	chunk = arena->free_large_chunks;
 	if (chunk && chunk->size >= alloc_size)
+	{
+		// assign alloc size
+		chunk->size = alloc_size;
+		
 		ptr = FT_MAL_CHUNK_SHIFT(chunk);
 
-	// remove chunk from list of empty tiny chunks
-	if (ptr)
+		// remove chunk from list of empty tiny chunks
 		ft_mal_remove_chunk_from_list(&arena->free_large_chunks, chunk);
+	}
 	
 	return (ptr);
 }
@@ -357,7 +362,7 @@ void		*ft_mal_allocate_memory(t_s_ft_mal_state *arena, size_t alloc_size)
 
 	ptr = NULL;
 	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
-		ptr = ft_mal_allocate_tiny_chunk(arena);
+		ptr = ft_mal_allocate_tiny_chunk(arena, alloc_size);
 	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
 	{
 		// merge small continious blocks in one
@@ -376,6 +381,9 @@ static void	ft_mal_free_tiny_chunk(t_s_ft_mal_state *arena, void *ptr)
 	t_s_ft_mal_chunk	*chunk;
 
 	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+
+	// assign max size of tiny chunks
+	chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
 
 	// add freed tiny chunk to list
 	ft_mal_add_chunk_to_list(&arena->free_tiny_chunks, chunk);

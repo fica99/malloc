@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 15:06:02 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/30 22:49:56 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/10/31 21:48:32 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@ void	ft_mal_remove_chunk_from_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *ch
 	// if chunk is head, remove it
 	if (*head == chunk)
 		*head = next;
+
+	// remove prev and next links from chunk
+	chunk->next = NULL;
+	chunk->prev = NULL;
 }
 
 // merge continious chunks in one
