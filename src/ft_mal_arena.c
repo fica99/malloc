@@ -171,19 +171,63 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 	return (res_arena);
 }
 
-// get saved arena for current thread
-t_s_ft_mal_state		*ft_mal_get_saved_arena(void)
+// checks is this pointer was allocated in this arena
+static bool	ft_mal_is_arenas_ptr(t_s_ft_mal_state *arena, void *ptr)
 {
-	pid_t				tid;
+	t_s_ft_mal_heap_info	*heap;
+	t_e_ft_mal_heap_type	heap_type;
+
+
+	// maybe arena is not created
+	if (!arena)
+		return (false);
+
+	// determine heap type by ptr
+	heap_type = ft_mal_get_heap_type_by_ptr(ptr);
+	
+	// search throw all heaps
+	heap = arena->heaps;
+	while (heap)
+	{
+		// is heap type equal
+		if (heap_type == heap->heap_type)
+		{
+			// is pointer inside heap
+			if (ptr > (void*)heap && (ptr - (void*)heap) <= heap->total_size)
+				return (true);
+		}
+		heap = heap->next;
+	}
+	return (false);
+}
+
+// get arena by pointer (search throw all arenas and heaps)(first search in current thread arena)
+t_s_ft_mal_state		*ft_mal_get_arena_by_ptr(void *ptr)
+{
+	t_s_ft_mal_state	*current_tid_arena;
 	t_s_ft_mal_state	*res_arena;
+	pid_t				tid;
 
 	// get current thread id
 	tid = gettid();
 
 	// find saved arena for current thread id
-	res_arena = ft_mal_get_saved_arena_tid(g_ft_arena, tid);
-	
-	return (res_arena);
+	current_tid_arena = ft_mal_get_saved_arena_tid(g_ft_arena, tid);
+
+	// check is the memory allocated in the same thread
+	if (ft_mal_is_arenas_ptr(current_tid_arena, ptr))
+		return (current_tid_arena);
+
+	// search throw all arenas
+	res_arena = g_ft_arena;
+	while (res_arena)
+	{
+		if (res_arena != current_tid_arena
+			&& ft_mal_is_arenas_ptr(res_arena, ptr))
+			return (res_arena);
+		res_arena = res_arena->next;
+	}
+	return (NULL);
 }
 
 // get available arena for current thread

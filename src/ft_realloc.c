@@ -24,9 +24,16 @@
 */
 #include "ft_mal_memory.h"
 
+/*
+*********** Arena header ********************
+*/
+#include "ft_mal_arena.h"
+
 
 void	*realloc(void *ptr, size_t size)
 {
+	t_s_ft_mal_state	*arena;
+	
 	// if there is no ptr, allocate new pointer
 	if (ptr == NULL)
 		return (malloc(size));
@@ -37,6 +44,19 @@ void	*realloc(void *ptr, size_t size)
 		free(ptr);
 		return (NULL);
 	}
+
+	// get arena by ptr (locking mutex)(first search in current thread arena, and then in others)
+	arena = ft_mal_get_arena_by_ptr(ptr);
+
+	// no one arena allocated this memory (memory was not allocated error)
+	if (!arena)
+		return (ptr);
+
+	// // free ptr to arena
+	// ft_mal_free_memory(arena, ptr);
+
+	// unlock mutex after reallocating the memory
+	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 
 	return (NULL);
 }

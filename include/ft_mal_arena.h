@@ -72,7 +72,7 @@ typedef struct				s_ft_mal_state
 /*
 ************* ft_mal_arena.c ******************
 */
-t_s_ft_mal_state			*ft_mal_get_saved_arena(void);
+t_s_ft_mal_state			*ft_mal_get_arena_by_ptr(void *ptr);
 t_s_ft_mal_state			*ft_mal_get_available_arena(void);
 void						*ft_mal_allocate_memory(t_s_ft_mal_state *arena,
 								size_t alloc_size);

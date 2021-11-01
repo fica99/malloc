@@ -38,16 +38,16 @@ void		free(void *ptr)
 	if (ptr == NULL)
 		return ;
 		
-	// get saved arena for current thread (locking mutex)
-	arena = ft_mal_get_saved_arena();
+	// get arena by ptr (locking mutex)(first search in current thread arena, and then in others)
+	arena = ft_mal_get_arena_by_ptr(ptr);
 
-	// no saved arena for current thread (memory was not allocated error)
+	// no one arena allocated this memory (memory was not allocated error)
 	if (!arena)
 		return ;
 
 	// free ptr to arena
 	ft_mal_free_memory(arena, ptr);
 
-	// unlock mutex after allocating the memory
+	// unlock mutex after freeing the memory
 	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 }
