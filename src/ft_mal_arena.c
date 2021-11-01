@@ -466,10 +466,18 @@ static void	ft_mal_free_large_chunk(t_s_ft_mal_state *arena, void *ptr)
 void	ft_mal_free_memory(t_s_ft_mal_state *arena, void *ptr)
 {
 	t_e_ft_mal_heap_type	heap_type;
+	t_s_ft_mal_chunk		*chunk;
 
 	// determine heap type by ptr
 	heap_type = ft_mal_get_heap_type_by_ptr(ptr);
+
+	// get chunk
+	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
 	
+	//already freed pointer
+	if (chunk->prev || chunk->next)
+		return ;
+
 	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
 		ft_mal_free_tiny_chunk(arena, ptr);
 	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
@@ -508,7 +516,7 @@ static void	*ft_mal_realloc_tiny_chunk(t_s_ft_mal_state *arena, void *ptr, size_
 		ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
 		
 		// free previous chunk
-		ft_mal_free_tiny_chunk(arena, ptr);
+		ft_mal_free_memory(arena, ptr);
 		
 		ptr = new_ptr;
 	}
@@ -534,7 +542,7 @@ static void	*ft_mal_realloc_small_chunk(t_s_ft_mal_state *arena, void *ptr, size
 	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
 	
 	// free previous chunk
-	ft_mal_free_small_chunk(arena, ptr);
+	ft_mal_free_memory(arena, ptr);
 	
 	return (new_ptr);
 }
@@ -576,7 +584,7 @@ static void	*ft_mal_realloc_large_chunk(t_s_ft_mal_state *arena, void *ptr, size
 	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
 		
 	// free previous chunk
-	ft_mal_free_large_chunk(arena, ptr);
+	ft_mal_free_memory(arena, ptr);
 		
 	return (new_ptr);
 }
