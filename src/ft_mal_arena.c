@@ -122,16 +122,13 @@ static t_s_ft_mal_state	*ft_mal_get_saved_arena_tid(t_s_ft_mal_state *arena, pid
 	while (arena)
 	{
 		if (ft_mal_arena_tid(arena->arena_id, tid, false))
-		{
-			FT_MAL_MUTEX_LOCK(&arena->mutex);
 			return (arena);
-		}
 		arena = arena->next;
 	}
 	return (NULL);
 }
 
-// find arena that is not in use by other thread or create new arena
+// find arena that is not in use by other thread or create new arena (locking mutex)
 static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 {
 	t_s_ft_mal_state	*res_arena;
@@ -185,6 +182,9 @@ static bool	ft_mal_is_arenas_ptr(t_s_ft_mal_state *arena, void *ptr)
 	// determine heap type by ptr
 	heap_type = ft_mal_get_heap_type_by_ptr(ptr);
 	
+	// lock mutex for iterating throw arena
+	FT_MAL_MUTEX_LOCK(&arena->mutex);
+
 	// search throw all heaps
 	heap = arena->heaps;
 	while (heap)
@@ -193,15 +193,18 @@ static bool	ft_mal_is_arenas_ptr(t_s_ft_mal_state *arena, void *ptr)
 		if (heap_type == heap->heap_type)
 		{
 			// is pointer inside heap
-			if (ptr > (void*)heap && (ptr - (void*)heap) <= heap->total_size)
+			if (ptr > (void*)heap && (ptr - (void*)heap) <= (long int)heap->total_size)
 				return (true);
 		}
 		heap = heap->next;
 	}
+
+	// unlock mutex, if arena is not found
+	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 	return (false);
 }
 
-// get arena by pointer (search throw all arenas and heaps)(first search in current thread arena)
+// get arena by pointer (locking mutex)(search throw all arenas and heaps)(first search in current thread arena)
 t_s_ft_mal_state		*ft_mal_get_arena_by_ptr(void *ptr)
 {
 	t_s_ft_mal_state	*current_tid_arena;
@@ -214,7 +217,7 @@ t_s_ft_mal_state		*ft_mal_get_arena_by_ptr(void *ptr)
 	// find saved arena for current thread id
 	current_tid_arena = ft_mal_get_saved_arena_tid(g_ft_arena, tid);
 
-	// check is the memory allocated in the same thread
+	// check is the memory allocated in the same thread (locking mutex)
 	if (ft_mal_is_arenas_ptr(current_tid_arena, ptr))
 		return (current_tid_arena);
 
@@ -223,14 +226,14 @@ t_s_ft_mal_state		*ft_mal_get_arena_by_ptr(void *ptr)
 	while (res_arena)
 	{
 		if (res_arena != current_tid_arena
-			&& ft_mal_is_arenas_ptr(res_arena, ptr))
+			&& ft_mal_is_arenas_ptr(res_arena, ptr)) //(locking mutex)
 			return (res_arena);
 		res_arena = res_arena->next;
 	}
 	return (NULL);
 }
 
-// get available arena for current thread
+// get available arena for current thread (locking mutex)
 t_s_ft_mal_state		*ft_mal_get_available_arena(void)
 {
 	pid_t				tid;
@@ -250,6 +253,8 @@ t_s_ft_mal_state		*ft_mal_get_available_arena(void)
 		// save arena for current thread id
 		ft_mal_arena_tid(res_arena->arena_id, tid, true);
 	}
+	else
+		FT_MAL_MUTEX_LOCK(&res_arena->mutex);
 	
 	return (res_arena);
 }
@@ -471,4 +476,124 @@ void	ft_mal_free_memory(t_s_ft_mal_state *arena, void *ptr)
 		ft_mal_free_small_chunk(arena, ptr);
 	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
 		ft_mal_free_large_chunk(arena, ptr);
+}
+
+// realloc tiny chunks (if we can use the same chunk, we don't need to realloc memory)
+static void	*ft_mal_realloc_tiny_chunk(t_s_ft_mal_state *arena, void *ptr, size_t size)
+{
+	t_e_ft_mal_heap_type	new_heap_type;
+	t_s_ft_mal_chunk		*chunk;
+	void					*new_ptr;
+	
+	// get chunk
+	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+	
+	// determine new heap type by size
+	new_heap_type = ft_mal_get_heap_type_by_alloc_size(size);
+	if (new_heap_type == FT_MAL_TINY_HEAP_TYPE)
+	{
+		// chunk type is the same and there is space for new size
+		// assign new_size
+		chunk->size = size;
+	}
+	else
+	{
+		new_ptr = ft_mal_allocate_memory(arena, size);
+
+		// error happened
+		if (!new_ptr)
+			return (ptr);
+
+		// copy data from previous chunk
+		ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
+		
+		// free previous chunk
+		ft_mal_free_tiny_chunk(arena, ptr);
+		
+		ptr = new_ptr;
+	}
+	return (ptr);
+}
+
+// realloc small chunks
+static void	*ft_mal_realloc_small_chunk(t_s_ft_mal_state *arena, void *ptr, size_t size)
+{
+	t_s_ft_mal_chunk		*chunk;
+	void					*new_ptr;
+	
+	// get chunk
+	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+	
+	new_ptr = ft_mal_allocate_memory(arena, size);
+
+	// error happened
+	if (!new_ptr)
+		return (ptr);
+
+	// copy data from previous chunk
+	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
+	
+	// free previous chunk
+	ft_mal_free_small_chunk(arena, ptr);
+	
+	return (new_ptr);
+}
+
+// realloc large chunks (if we can use the same chunk, we don't need to realloc memory)
+static void	*ft_mal_realloc_large_chunk(t_s_ft_mal_state *arena, void *ptr, size_t size)
+{
+	t_e_ft_mal_heap_type	new_heap_type;
+	t_s_ft_mal_chunk		*chunk;
+	void					*new_ptr;
+	t_s_ft_mal_heap_info	*heap;
+	
+	// get chunk
+	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+	
+	// determine new heap type by size
+	new_heap_type = ft_mal_get_heap_type_by_alloc_size(size);
+
+	if (new_heap_type == FT_MAL_LARGE_HEAP_TYPE)
+	{
+		// chunk type is the same and there is space for new size
+		heap = FT_MAL_HEAP_INFO_BACK_SHIFT(chunk);
+		
+		if (heap->total_size - (ptr - (void*)heap) >= size)
+		{
+			// assign new_size
+			chunk->size = size;
+			return (ptr);
+		}
+	}
+	
+	new_ptr = ft_mal_allocate_memory(arena, size);
+
+	// error happened
+	if (!new_ptr)
+		return (ptr);
+
+	// copy data from previous chunk
+	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
+		
+	// free previous chunk
+	ft_mal_free_large_chunk(arena, ptr);
+		
+	return (new_ptr);
+}
+
+// realloc memory with arena
+void	*ft_mal_realloc_memory(t_s_ft_mal_state *arena, void *ptr, size_t size)
+{
+	t_e_ft_mal_heap_type	heap_type;
+
+	// determine heap type by ptr
+	heap_type = ft_mal_get_heap_type_by_ptr(ptr);
+
+	if (heap_type == FT_MAL_TINY_HEAP_TYPE)
+		return (ft_mal_realloc_tiny_chunk(arena, ptr, size));
+	else if (heap_type == FT_MAL_SMALL_HEAP_TYPE)
+		return (ft_mal_realloc_small_chunk(arena, ptr, size));
+	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
+		return (ft_mal_realloc_large_chunk(arena, ptr, size));
+	return (ptr);
 }

@@ -52,11 +52,11 @@ void	*realloc(void *ptr, size_t size)
 	if (!arena)
 		return (ptr);
 
-	// // free ptr to arena
-	// ft_mal_free_memory(arena, ptr);
+	// realloc memory by ptr
+	ptr = ft_mal_realloc_memory(arena, ptr, size);
 
 	// unlock mutex after reallocating the memory
 	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 
-	return (NULL);
+	return (ptr);
 }

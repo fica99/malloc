@@ -78,7 +78,8 @@ void						*ft_mal_allocate_memory(t_s_ft_mal_state *arena,
 								size_t alloc_size);
 void						ft_mal_free_memory(t_s_ft_mal_state *arena,
 								void *ptr);
-
+void						*ft_mal_realloc_memory(t_s_ft_mal_state *arena,
+								void *ptr, size_t size);
 
 /*
 *************************** Global variables ********************************
