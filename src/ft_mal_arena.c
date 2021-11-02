@@ -510,7 +510,7 @@ static void	*ft_mal_realloc_tiny_chunk(t_s_ft_mal_state *arena, void *ptr, size_
 
 		// error happened
 		if (!new_ptr)
-			return (ptr);
+			return (NULL);
 
 		// copy data from previous chunk
 		ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
@@ -536,7 +536,7 @@ static void	*ft_mal_realloc_small_chunk(t_s_ft_mal_state *arena, void *ptr, size
 
 	// error happened
 	if (!new_ptr)
-		return (ptr);
+		return (NULL);
 
 	// copy data from previous chunk
 	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
@@ -578,7 +578,7 @@ static void	*ft_mal_realloc_large_chunk(t_s_ft_mal_state *arena, void *ptr, size
 
 	// error happened
 	if (!new_ptr)
-		return (ptr);
+		return (NULL);
 
 	// copy data from previous chunk
 	ft_memcpy(new_ptr, ptr, size > chunk->size ? chunk->size : size);
@@ -603,7 +603,7 @@ void	*ft_mal_realloc_memory(t_s_ft_mal_state *arena, void *ptr, size_t size)
 		return (ft_mal_realloc_small_chunk(arena, ptr, size));
 	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
 		return (ft_mal_realloc_large_chunk(arena, ptr, size));
-	return (ptr);
+	return (NULL);
 }
 
 // return arenas global variable head (get list of all arenas)

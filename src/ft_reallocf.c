@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_realloc.c                                       :+:      :+:    :+:   */
+/*   ft_reallocf.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/31 23:32:32 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/02 18:40:13 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@
 */
 #include "ft_mal_arena.h"
 
-
-void	*realloc(void *ptr, size_t size)
+// same as realloc, but if there is an error, it frees ptr
+void	*reallocf(void *ptr, size_t size)
 {
 	t_s_ft_mal_state	*arena;
 	void				*res;
@@ -51,17 +51,20 @@ void	*realloc(void *ptr, size_t size)
 
 	// no one arena allocated this memory (memory was not allocated error)
 	if (!arena)
-		return (ptr);
+	{
+		// if there is error return NULL
+		return (NULL);
+	}
 
 	// realloc memory by ptr
 	res = ft_mal_realloc_memory(arena, ptr, size);
 
-	// unlock mutex after reallocating the memory
-	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
-
 	// error occured
 	if (!res)
-		return (ptr);
+		ft_mal_free_memory(arena, ptr);
+
+	// unlock mutex after reallocating the memory
+	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
 
 	return (res);
 }
