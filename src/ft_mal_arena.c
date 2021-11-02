@@ -449,7 +449,7 @@ static void	ft_mal_free_small_chunk(t_s_ft_mal_state *arena, void *ptr)
 	ft_mal_add_chunk_to_list(&arena->free_small_chunks, chunk);
 	
 	// sort list by adress
-	ft_mal_sort_list(&arena->free_small_chunks);
+	ft_mal_sort_chunks(&arena->free_small_chunks);
 }
 
 // free large chunks of memory
@@ -604,4 +604,10 @@ void	*ft_mal_realloc_memory(t_s_ft_mal_state *arena, void *ptr, size_t size)
 	else if (heap_type == FT_MAL_LARGE_HEAP_TYPE)
 		return (ft_mal_realloc_large_chunk(arena, ptr, size));
 	return (ptr);
+}
+
+// return arenas global variable head (get list of all arenas)
+t_s_ft_mal_state			*ft_mal_get_arenas_list(void)
+{
+	return (g_ft_arena);
 }

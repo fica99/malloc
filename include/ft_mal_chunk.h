@@ -63,5 +63,5 @@ typedef struct				s_ft_mal_chunk
 void	ft_mal_add_chunk_to_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
 void	ft_mal_remove_chunk_from_list(t_s_ft_mal_chunk **head, t_s_ft_mal_chunk *chunk);
 void	ft_mal_merge_chunks(t_s_ft_mal_chunk *chunks);
-void	ft_mal_sort_list(t_s_ft_mal_chunk **head);
+void	ft_mal_sort_chunks(t_s_ft_mal_chunk **head);
 #endif

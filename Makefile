@@ -30,13 +30,14 @@ LIB_DIR			:=		.
 # ------------  SOURCE FILES  ------------------------------------------------ #
 PRE_FLS			:=		ft_mal_precomp.c
 
-SRC_FLS			:=		$(PRE_FLS)		\
-						ft_mal_arena.c	\
-						ft_mal_heap.c	\
-						ft_mal_chunk.c	\
-						ft_free.c		\
-						ft_malloc.c		\
-						ft_realloc.c	\
+SRC_FLS			:=		$(PRE_FLS)				\
+						ft_mal_arena.c			\
+						ft_mal_heap.c			\
+						ft_mal_chunk.c			\
+						ft_free.c				\
+						ft_malloc.c				\
+						ft_realloc.c			\
+						ft_mal_show_alloc_mem.c
 
 # ------------  LIBFTPRINTF  ------------------------------------------------- #
 LFTPRINTF		:=		libftprintf.a

@@ -80,5 +80,6 @@ t_s_ft_mal_heap_info			*ft_mal_new_heap(t_s_ft_mal_state *arena,
 int								ft_mal_free_heap(t_s_ft_mal_heap_info **head, t_s_ft_mal_heap_info *heap);
 t_e_ft_mal_heap_type			ft_mal_get_heap_type_by_alloc_size(size_t alloc_size);
 t_e_ft_mal_heap_type			ft_mal_get_heap_type_by_ptr(void *ptr);
+void							ft_mal_sort_heaps(t_s_ft_mal_heap_info **head);
 #endif
 

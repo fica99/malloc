@@ -123,19 +123,23 @@ static void				ft_mal_add_new_empty_chunks(t_s_ft_mal_state *arena, t_s_ft_mal_h
 	if (heap_info->heap_type == FT_MAL_TINY_HEAP_TYPE)
 	{
 		// add chunks from block to tiny chunks list
-		i = 0;
-		while (i + (sizeof(t_s_ft_mal_chunk)
-			+ FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE) < heap_info->total_size)
+		i = start - (void*)heap_info;
+		while (i < heap_info->total_size)
 		{
 			// initialize header
-			ft_bzero(start + i, sizeof(t_s_ft_mal_chunk));
+			if (i + sizeof(t_s_ft_mal_chunk) < heap_info->total_size)
+				ft_bzero((void*)heap_info + i, sizeof(t_s_ft_mal_chunk));
+		
+			if (i + (sizeof(t_s_ft_mal_chunk) + FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE)
+				< heap_info->total_size)
+			{
+				current_chunk = (void*)heap_info + i;
 
-			current_chunk = start + i;
+				current_chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
 
-			current_chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
-
-			// add chunk to start of tiny chunks list
-			ft_mal_add_chunk_to_list(&arena->free_tiny_chunks, current_chunk);
+				// add chunk to start of tiny chunks list
+				ft_mal_add_chunk_to_list(&arena->free_tiny_chunks, current_chunk);
+			}
 		
 			i += (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk));
 		}
@@ -165,6 +169,9 @@ static void		ft_mal_add_heap_to_list(t_s_ft_mal_heap_info **head, t_s_ft_mal_hea
 {
 	// assign next element
 	heap->next = *head;
+
+	// assign previous element
+	heap->prev = NULL;
 	
 	// assign previous element
 	if (*head)
@@ -273,3 +280,50 @@ t_e_ft_mal_heap_type	ft_mal_get_heap_type_by_ptr(void *ptr)
 	return (ft_mal_get_heap_type_by_alloc_size(chunk->size));
 }
 
+// sort heaps by adress
+void	ft_mal_sort_heaps(t_s_ft_mal_heap_info **head)
+{
+	t_s_ft_mal_heap_info	*current;
+	t_s_ft_mal_heap_info	*next;
+	t_s_ft_mal_heap_info	*tmp;
+
+	// start from first element
+	current = *head;
+	while (current)
+	{
+		next = current->next;
+		if (next)
+		{
+			// compare with next element
+			if ((void*)current > (void*)next)
+			{
+				// swap elements in list
+				tmp = next->next;
+				
+				next->prev = current->prev;
+				if (next->prev)
+					next->prev->next = next;
+				
+				next->next = current;
+				current->prev = next;
+				
+				current->next = tmp;
+				if (current->next)
+					current->next->prev = current;
+				
+				// check one element before for swapping adresses
+				if (next->prev)
+				{
+					current = next->prev;
+					continue ;
+				}
+				else
+				{
+					// update head after swapping elements
+					*head = next;
+				}
+			}
+		}
+		current = next;
+	}
+}

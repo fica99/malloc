@@ -96,33 +96,40 @@ void	ft_mal_merge_chunks(t_s_ft_mal_chunk *chunks)
 }
 
 // sort chunks by adress
-void	ft_mal_sort_list(t_s_ft_mal_chunk **head)
+void	ft_mal_sort_chunks(t_s_ft_mal_chunk **head)
 {
-	t_s_ft_mal_chunk	*current_chunk;
+	t_s_ft_mal_chunk	*current;
 	t_s_ft_mal_chunk	*next;
 	t_s_ft_mal_chunk	*tmp;
 
 	// start from first element
-	current_chunk = *head;
-	while (current_chunk)
+	current = *head;
+	while (current)
 	{
-		next = current_chunk->next;
+		next = current->next;
 		if (next)
 		{
 			// compare with next element
-			if ((void*)current_chunk > (void*)next)
+			if ((void*)current > (void*)next)
 			{
 				// swap elements in list
 				tmp = next->next;
-				next->prev = current_chunk->prev;
-				next->next = current_chunk;
-				current_chunk->prev = next;
-				current_chunk->next = tmp;
+				
+				next->prev = current->prev;
+				if (next->prev)
+					next->prev->next = next;
+				
+				next->next = current;
+				current->prev = next;
+				
+				current->next = tmp;
+				if (current->next)
+					current->next->prev = current;
 				
 				// check one element before for swapping adresses
 				if (next->prev)
 				{
-					current_chunk = next->prev;
+					current = next->prev;
 					continue ;
 				}
 				else
@@ -132,6 +139,6 @@ void	ft_mal_sort_list(t_s_ft_mal_chunk **head)
 				}
 			}
 		}
-		current_chunk = next;
+		current = next;
 	}
 }
