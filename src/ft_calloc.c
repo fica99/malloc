@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_malloc.c                                        :+:      :+:    :+:   */
+/*   ft_calloc.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/31 22:57:35 by aashara-         ###   ########.fr       */
+/*   Created: 2021/11/02 17:52:28 by aashara-          #+#    #+#             */
+/*   Updated: 2021/11/02 17:58:12 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,27 +24,16 @@
 */
 #include "ft_mal_memory.h"
 
-/*
-*********** Arena header ********************
-*/
-#include "ft_mal_arena.h"
-
-void	*malloc(size_t size)
+void	*calloc(size_t num, size_t size)
 {
-	t_s_ft_mal_state	*arena;
-	void				*ptr;
+	void	*ptr;
 
-	// get available arena (locking mutex)
-	arena = ft_mal_get_available_arena();
+	// allocate memory
+	ptr = malloc(size * num);
 
-	// error happened
-	if (!arena)
-		return (NULL);
+	// if pointer is allocated, we should set all bytes to 0
+	if (ptr)
+		ft_bzero(ptr, size * num);
 
-	ptr = ft_mal_allocate_memory(arena, size);
-
-	// unlock mutex after allocating the memory
-	FT_MAL_MUTEX_UNLOCK(&arena->mutex);
-
-	return (ptr);	
+	return (ptr);
 }
