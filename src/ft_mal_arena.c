@@ -162,18 +162,27 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 			
 			// add arena to the start of the list
 			ft_mal_add_arena_to_list(arena, res_arena);
+
+			// lock mutex
+			FT_MAL_MUTEX_LOCK(&res_arena->mutex);
+
+			break ;
 		}
 		
 		// continue loop from the beginning if all arenas are locked
 		if (!res_arena)
+		{
 			res_arena = *arena;
-		else
+			continue ;
+		}
+		else if (*arena && (*arena)->arena_id >= FT_MAL_MAX_NB_ARENAS)
 		{
 			// locking mutex if return value is true
 			if (ft_mal_is_available_arena(res_arena))
 				break ;
-			res_arena = res_arena->next;
 		}
+		res_arena = res_arena->next;
+
 	}
 
 	return (res_arena);

@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/11/04 17:34:11 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/04 18:35:17 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,18 @@
 *********** libft ***************************
 */
 #include "libft.h"
+
+
+/*
+*************************** Global variables ********************************
+*/
+
+/*
+*********** writing mutex ********************
+*/
+
+static pthread_mutex_t	g_ft_mal_writing_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 // putnbr for different bases
 static void	ft_mal_putnbr_base(size_t nb, size_t base)
@@ -249,15 +261,19 @@ void		show_alloc_mem(void)
 		FT_MAL_MUTEX_LOCK(&arena->mutex);
 
 		// print arena header
+		FT_MAL_MUTEX_LOCK(&g_ft_mal_writing_mutex);
 		ft_putstr("Arena ID : ");
 		ft_mal_putnbr_base(arena->arena_id, 10);
 		ft_putstr("\n");
+		FT_MAL_MUTEX_UNLOCK(&g_ft_mal_writing_mutex);
 
 		// sort heaps
 		ft_mal_sort_heaps(&arena->heaps);
 
 		// print heaps
+		FT_MAL_MUTEX_LOCK(&g_ft_mal_writing_mutex);
 		ft_mal_show_heaps(arena);
+		FT_MAL_MUTEX_UNLOCK(&g_ft_mal_writing_mutex);
 		
 		// unlock mutex after showing info
 		FT_MAL_MUTEX_UNLOCK(&arena->mutex);
