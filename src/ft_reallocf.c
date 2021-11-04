@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/11/02 18:40:13 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/04 13:03:58 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	*reallocf(void *ptr, size_t size)
 	if (!size)
 	{
 		free(ptr);
-		return (malloc(0));
+		return (NULL);
 	}
 
 	// get arena by ptr (locking mutex)(first search in current thread arena, and then in others)

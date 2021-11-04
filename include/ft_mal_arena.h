@@ -14,13 +14,24 @@
 # define FT_MAL_ARENA_H
 
 /*
+******************************** System headers *******************************
+*/
+
+/*
+************ pthread_mutex_t ********************
+************ pthread_mutex_init *****************
+*/
+#include <pthread.h>
+
+
+/*
 *************************** User headers ************************************
 */
 
 /*
 *********** Chunk ***************************
 */
-# include "ft_mal_chunk.h"
+#include "ft_mal_chunk.h"
 
 /*
 *********** Heaps ***************************
@@ -46,7 +57,7 @@ typedef struct				s_ft_mal_state
 	size_t					arena_id;
 
 	/* Heaps of arena */
-	t_s_ft_mal_heap_info	*heaps;	// needs only for show_alloc_mem();
+	t_s_ft_mal_heap_info	*heaps;				// needs only for show_alloc_mem();
 	
 	/* Empty tiny chunks */
 	t_s_ft_mal_chunk		*free_tiny_chunks;	// use pool allocator
@@ -61,7 +72,7 @@ typedef struct				s_ft_mal_state
 	struct s_ft_mal_state	*next;
 }							t_s_ft_mal_state;
 
-# define FT_MAL_STATE_SIZE (sizeof(t_s_ft_mal_state))
+static const size_t FT_MAL_STATE_SIZE = sizeof(t_s_ft_mal_state);
 # define FT_MAL_STATE_SHIFT(start) ((void*)start + FT_MAL_STATE_SIZE)
 
 

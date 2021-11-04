@@ -47,8 +47,8 @@
 /*
 *********** Limits ***************************
 */
-# define FT_MAL_MAX_NB_ARENAS 8 // should change it
-# define FT_MAL_MAX_THREADS 410669 // max number of threads
+# define FT_MAL_MAX_NB_ARENAS 8		// number of arenas
+# define FT_MAL_MAX_THREADS 410669	// max number of threads
 
 
 /*
@@ -94,7 +94,7 @@ static t_s_ft_mal_state	*ft_mal_new_arena(void)
 	return (arena);
 }
 
-// is arena used by another thread
+// is arena used by another thread (lock mutex)
 static bool				ft_mal_is_available_arena(t_s_ft_mal_state *arena)
 {
 	if (!arena)
@@ -128,6 +128,17 @@ static t_s_ft_mal_state	*ft_mal_get_saved_arena_tid(t_s_ft_mal_state *arena, pid
 	return (NULL);
 }
 
+// add arena to start of the arenas list
+static void				ft_mal_add_arena_to_list(t_s_ft_mal_state **head, t_s_ft_mal_state *arena)
+{
+	// assign next element
+	arena->next = *head;
+	
+	// add element to the start of the list
+	*head = arena;
+}
+
+
 // find arena that is not in use by other thread or create new arena (locking mutex)
 static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 {
@@ -150,8 +161,7 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 			res_arena->arena_id = ((*arena) ? (*arena)->arena_id + 1 : 0);
 			
 			// add arena to the start of the list
-			res_arena->next = *arena;
-			*arena = res_arena;
+			ft_mal_add_arena_to_list(arena, res_arena);
 		}
 		
 		// continue loop from the beginning if all arenas are locked
@@ -159,6 +169,7 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 			res_arena = *arena;
 		else
 		{
+			// locking mutex if return value is true
 			if (ft_mal_is_available_arena(res_arena))
 				break ;
 			res_arena = res_arena->next;
@@ -248,13 +259,14 @@ t_s_ft_mal_state		*ft_mal_get_available_arena(void)
 	// find empty arena or create new, if there is no saved arena for current thread
 	if (!res_arena)
 	{
+		// locking mutex
 		res_arena = ft_mal_find_available_arena(&g_ft_arena);
 		
 		// save arena for current thread id
 		ft_mal_arena_tid(res_arena->arena_id, tid, true);
 	}
 	else
-		FT_MAL_MUTEX_LOCK(&res_arena->mutex);
+		FT_MAL_MUTEX_LOCK(&res_arena->mutex); // locking mutex
 	
 	return (res_arena);
 }
@@ -294,29 +306,25 @@ static void	*ft_mal_allocate_tiny_chunk(t_s_ft_mal_state *arena, size_t alloc_si
 }
 
 // get first fitting chunk from list of empty chunks and remove it from list
-static t_s_ft_mal_chunk		*ft_mal_get_first_fit_small_chunk(t_s_ft_mal_chunk **chunks_list, size_t alloc_size)
+static t_s_ft_mal_chunk		*ft_mal_get_first_fit_small_chunk(t_s_ft_mal_chunk *chunks_list, size_t alloc_size)
 {
 	t_s_ft_mal_chunk	*current_chunk;
 	t_s_ft_mal_chunk	*tmp_chunk;
 
-	current_chunk = *chunks_list;
+	current_chunk = chunks_list;
 	while (current_chunk)
 	{
 		if (current_chunk->size == alloc_size)
-		{
-			// remove current chunk from the list
-			ft_mal_remove_chunk_from_list(chunks_list, current_chunk);
 			break ;
-		}
 		else if (current_chunk->size >= alloc_size +
-			(FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE + sizeof(t_s_ft_mal_chunk)))	// we need size for next chunk
+			FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE + FT_MAL_CHUNK_SIZE)	// we need size for next chunk
 		{
 			// remove current chunk from the list and create next element
 
 			// next chunk initialization and adding it to list
 			tmp_chunk = (void*)FT_MAL_CHUNK_SHIFT(current_chunk) + alloc_size;
-			ft_bzero((void*)tmp_chunk, sizeof(t_s_ft_mal_chunk));
-			tmp_chunk->size = current_chunk->size - (alloc_size + sizeof(t_s_ft_mal_chunk));
+			ft_bzero((void*)tmp_chunk, FT_MAL_CHUNK_SIZE);
+			tmp_chunk->size = current_chunk->size - (alloc_size + FT_MAL_CHUNK_SIZE);
 			tmp_chunk->prev = current_chunk;
 			tmp_chunk->next = current_chunk->next;
 			if (tmp_chunk->next)
@@ -326,8 +334,6 @@ static t_s_ft_mal_chunk		*ft_mal_get_first_fit_small_chunk(t_s_ft_mal_chunk **ch
 			current_chunk->size = alloc_size;
 			current_chunk->next = tmp_chunk;
 
-			// remove current chunk from the list
-			ft_mal_remove_chunk_from_list(chunks_list, current_chunk);
 			break ;
 		}
 		current_chunk = current_chunk->next;
@@ -343,7 +349,7 @@ static void	*ft_mal_allocate_small_chunk(t_s_ft_mal_state *arena, size_t alloc_s
 	t_s_ft_mal_chunk		*chunk;
 	void					*ptr;
 
-	chunk = ft_mal_get_first_fit_small_chunk(&arena->free_small_chunks, alloc_size);
+	chunk = ft_mal_get_first_fit_small_chunk(arena->free_small_chunks, alloc_size);
 
 	// if there is no chunk enough for this memory, we should allocate new heap
 	if (!chunk)
@@ -354,13 +360,18 @@ static void	*ft_mal_allocate_small_chunk(t_s_ft_mal_state *arena, size_t alloc_s
 		if (!heap_info)
 			return (NULL);
 
-		chunk = ft_mal_get_first_fit_small_chunk(&arena->free_small_chunks, alloc_size);
+		chunk = ft_mal_get_first_fit_small_chunk(arena->free_small_chunks, alloc_size);
 	}
 
 	// assign pointer
 	ptr = NULL;
 	if (chunk && chunk->size == alloc_size)
+	{
 		ptr = FT_MAL_CHUNK_SHIFT(chunk);
+
+		// remove chunk from list of empty small chunks
+		ft_mal_remove_chunk_from_list(&arena->free_small_chunks, chunk);
+	}
 	
 	return (ptr);
 }

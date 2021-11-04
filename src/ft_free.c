@@ -38,7 +38,7 @@ void		free(void *ptr)
 	if (ptr == NULL)
 		return ;
 		
-	// get arena by ptr (first search in current thread arena, and then in others)
+	// get arena by ptr (first search in current thread arena, and then in others)(locking mutex)
 	arena = ft_mal_get_arena_by_ptr(ptr);
 
 	// no one arena allocated this memory (memory was not allocated error)

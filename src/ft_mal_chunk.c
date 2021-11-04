@@ -82,7 +82,7 @@ void	ft_mal_merge_chunks(t_s_ft_mal_chunk *chunks)
 			if (FT_MAL_CHUNK_SHIFT(current) + current->size == (void*)next)
 			{
 				// merge size and header
-				current->size += (next->size + sizeof(t_s_ft_mal_chunk));
+				current->size += (next->size + FT_MAL_CHUNK_SIZE);
 				
 				// remove merged element from list
 				// we sending pointer to head, but head element cannot be removed

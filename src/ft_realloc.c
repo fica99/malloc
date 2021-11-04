@@ -43,7 +43,7 @@ void	*realloc(void *ptr, size_t size)
 	if (!size)
 	{
 		free(ptr);
-		return (malloc(0));
+		return (NULL);
 	}
 
 	// get arena by ptr (locking mutex)(first search in current thread arena, and then in others)

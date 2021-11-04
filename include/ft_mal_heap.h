@@ -63,10 +63,9 @@ typedef struct					s_ft_mal_heap_info
 	t_e_ft_mal_heap_type		heap_type;
 }								t_s_ft_mal_heap_info;
 
-# define FT_MAL_HEAP_INFO_SIZE (sizeof(t_s_ft_mal_heap_info))
+static const size_t FT_MAL_HEAP_INFO_SIZE = sizeof(t_s_ft_mal_heap_info);
 # define FT_MAL_HEAP_INFO_SHIFT(start) ((void*)start + FT_MAL_HEAP_INFO_SIZE)
 # define FT_MAL_HEAP_INFO_BACK_SHIFT(start) ((void*)start - FT_MAL_HEAP_INFO_SIZE)
-
 
 /*
 *************************** Functions ****************************************

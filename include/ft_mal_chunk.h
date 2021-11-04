@@ -14,17 +14,17 @@
 # define FT_MAL_CHUNK_H
 
 /*
-*************************** Macroses *****************************************
+*************************** Variables ***************************************
 */
 
 /*
 ********* Chunk sizes ************
 */
-# define FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE 1
-# define FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE 256
-# define FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE (FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + 1)
-# define FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE 2048
-# define FT_MAL_LARGE_CHUNK_MIN_ALLOC_SIZE (FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + 1)
+static const size_t FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE = 1;
+static const size_t FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE = 256;
+static const size_t FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + 1;
+static const size_t FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE = 2048;
+static const size_t FT_MAL_LARGE_CHUNK_MIN_ALLOC_SIZE = FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + 1;
 
 
 /*
@@ -48,7 +48,9 @@ typedef struct				s_ft_mal_chunk
 	struct s_ft_mal_chunk*	prev;
 }							t_s_ft_mal_chunk;
 
-# define FT_MAL_CHUNK_SIZE (sizeof(t_s_ft_mal_chunk))
+static const size_t FT_MAL_CHUNK_SIZE = sizeof(t_s_ft_mal_chunk);
+static const size_t FT_MAL_TINY_CHUNK_SIZE = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + FT_MAL_CHUNK_SIZE;
+static const size_t FT_MAL_SMALL_CHUNK_SIZE = FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + FT_MAL_CHUNK_SIZE;
 # define FT_MAL_CHUNK_SHIFT(start) ((void*)start + FT_MAL_CHUNK_SIZE)
 # define FT_MAL_CHUNK_BACK_SHIFT(start) ((void*)start - FT_MAL_CHUNK_SIZE)
 

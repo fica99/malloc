@@ -23,12 +23,9 @@
 # include <stdbool.h>
 
 /*
-************ pthread_mutex_t ********************
 ************ pthread_mutex_trylock **************
 ************ pthread_mutex_lock *****************
 ************ pthread_mutex_unlock ***************
-************ pthread_mutex_init *****************
-************ pthread_mutex_destroy **************
 */
 # include <pthread.h>
 

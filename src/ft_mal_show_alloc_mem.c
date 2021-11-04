@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/11/02 16:45:29 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/04 13:36:44 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ static size_t	ft_mal_show_tiny_heap(t_s_ft_mal_state *arena, t_s_ft_mal_heap_inf
 		}
 
 		// next chunk
-		i += (sizeof(t_s_ft_mal_chunk) + FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE);
+		i += FT_MAL_TINY_CHUNK_SIZE;
 	}
 
 	return (total_size);
@@ -161,12 +161,12 @@ void		show_alloc_mem(void)
 	t_s_ft_mal_state	*arena;
 
 	// get head of arenas list
-	arena = ft_mal_get_available_arena();
+	arena = ft_mal_get_arenas_list();
 	
 	while (arena)
 	{
 		// lock mutex
-		FT_MAL_MUTEX_UNLOCK(&arena->mutex);
+		FT_MAL_MUTEX_LOCK(&arena->mutex);
 
 		ft_printf("Arena ID: %d\n", arena->arena_id);
 
