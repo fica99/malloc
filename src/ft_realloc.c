@@ -29,12 +29,11 @@
 */
 #include "ft_mal_arena.h"
 
-
 void	*realloc(void *ptr, size_t size)
 {
 	t_s_ft_mal_state	*arena;
 	void				*res;
-	
+
 	// if there is no ptr, allocate new pointer
 	if (ptr == NULL)
 		return (malloc(size));

@@ -29,11 +29,10 @@
 */
 #include "ft_mal_arena.h"
 
-
 void		free(void *ptr)
 {
 	t_s_ft_mal_state	*arena;
-	
+
 	// empty pointer
 	if (ptr == NULL)
 		return ;
