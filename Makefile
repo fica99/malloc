@@ -40,7 +40,8 @@ SRC_FLS			:=		$(PRE_FLS)				\
 						ft_mal_show_alloc_mem.c	\
 						ft_calloc.c				\
 						ft_reallocf.c			\
-						ft_mal_memory.c
+						ft_mal_memory.c			\
+						ft_mal_print.c
 
 # ------------  LIBFTPRINTF  ------------------------------------------------- #
 LFTPRINTF		:=		libftprintf.a
