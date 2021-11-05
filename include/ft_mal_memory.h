@@ -53,4 +53,9 @@ void	*calloc(size_t num, size_t size);
 */
 void	show_alloc_mem(void);
 
+/*
+******* ft_mal_show_alloc_mem_ex.c *****
+*/
+void	show_alloc_mem_ex(void);
+
 #endif
