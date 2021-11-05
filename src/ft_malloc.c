@@ -20,7 +20,7 @@
 #include "ft_mal_precomp.h"
 
 /*
-*********** All memory functions header ********************
+*********** All memory functions header *****
 */
 #include "ft_mal_memory.h"
 
@@ -28,6 +28,7 @@
 *********** Arena header ********************
 */
 #include "ft_mal_arena.h"
+
 
 void	*malloc(size_t size)
 {

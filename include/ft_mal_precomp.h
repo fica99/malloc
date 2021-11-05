@@ -23,6 +23,11 @@
 # include <stdbool.h>
 
 /*
+************* size_t ****************************
+*/
+#include <stddef.h>
+
+/*
 ************ pthread_mutex_trylock **************
 ************ pthread_mutex_lock *****************
 ************ pthread_mutex_unlock ***************

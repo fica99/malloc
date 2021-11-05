@@ -14,7 +14,7 @@
 # define FT_MAL_ARENA_H
 
 /*
-******************************** System headers *******************************
+*************************** System headers **********************************
 */
 
 /*
@@ -86,6 +86,10 @@ static const size_t FT_MAL_STATE_SIZE = sizeof(t_s_ft_mal_state);
 t_s_ft_mal_state			*ft_mal_get_arena_by_ptr(void *ptr);
 t_s_ft_mal_state			*ft_mal_get_available_arena(void);
 t_s_ft_mal_state			*ft_mal_get_arenas_list(void);
+
+/*
+************* ft_mal_memory.c ******************
+*/
 void						*ft_mal_allocate_memory(t_s_ft_mal_state *arena,
 								size_t alloc_size);
 void						ft_mal_free_memory(t_s_ft_mal_state *arena,
