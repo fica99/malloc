@@ -77,27 +77,3 @@ You can change your own malloc istead of system and test it with system commands
 ➜  malloc git:(main) ✗ LD_PRELOAD=$PWD/libft_malloc.so ls
 Makefile  README.md  en.subject.pdf  include  libft_malloc.so  libft_malloc_x86_64.so  libftprintf  src  tmp
 ```
-
-## Bonus
-
-- `calloc()`
-- `reallocf()`
-- Multi-thread safe with pthread
-- Show hex dump of allocated zones with `show_alloc_mem_ex()`
-- Optimized algorithm for cache memory in different threads
-
-### Constants
-
-For better performance, we preallocate heaps for small malloc calls. We define 3 heap types: TINY, SMALL, LARGE.
-
-```c
-
-/*
-********* Chunk sizes ************
-*/
-static const size_t FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE = 1;
-static const size_t FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE = 256;
-static const size_t FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + 1;
-static const size_t FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE = 2048;
-static const size_t FT_MAL_LARGE_CHUNK_MIN_ALLOC_SIZE = FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + 1;
-```
