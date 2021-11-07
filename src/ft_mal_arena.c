@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/11/07 13:02:06 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/07 14:29:15 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,7 @@ static bool	ft_mal_is_correct_heap_ptr(t_s_ft_mal_state *arena, t_s_ft_mal_heap_
 	}
 	else if (heap->heap_type == FT_MAL_SMALL_HEAP_TYPE)
 	{
-		while (chunk_ptr - (void*)heap < heap->total_size)
+		while ((size_t)(chunk_ptr - (void*)heap) < heap->total_size)
 		{
 			chunk = chunk_ptr;
 			if (FT_MAL_CHUNK_SHIFT(chunk_ptr) == ptr)
