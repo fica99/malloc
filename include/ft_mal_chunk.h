@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:00:31 by marvin            #+#    #+#             */
-/*   Updated: 2021/10/30 22:35:29 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/06 20:44:17 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@
 ********* Chunk sizes ************
 */
 static const size_t FT_MAL_TINY_CHUNK_MIN_ALLOC_SIZE = 1;
-static const size_t FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE = 256;
+static const size_t FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE = 104;
 static const size_t FT_MAL_SMALL_CHUNK_MIN_ALLOC_SIZE = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE + 1;
-static const size_t FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE = 2048;
+static const size_t FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE = 1031;
 static const size_t FT_MAL_LARGE_CHUNK_MIN_ALLOC_SIZE = FT_MAL_SMALL_CHUNK_MAX_ALLOC_SIZE + 1;
 
 

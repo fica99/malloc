@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/31 22:45:17 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/07 13:02:06 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@
 /*
 *********** Limits ***************************
 */
-# define FT_MAL_MAX_NB_ARENAS 8		// number of arenas
-# define FT_MAL_MAX_THREADS 410669	// max number of threads
+# define FT_MAL_MAX_NB_ARENAS 8	// number of arenas
+# define FT_MAL_MAX_THREADS 100	// max number of threads
 
 
 /*
@@ -155,19 +155,53 @@ static t_s_ft_mal_state	*ft_mal_find_available_arena(t_s_ft_mal_state **arena)
 	return (res_arena);
 }
 
+// check for ptr, is it correct
+static bool	ft_mal_is_correct_heap_ptr(t_s_ft_mal_state *arena, t_s_ft_mal_heap_info *heap, void *ptr)
+{
+	void				*chunk_ptr;
+	t_s_ft_mal_chunk	*chunk;
+
+	// shift heap
+	chunk_ptr = FT_MAL_HEAP_INFO_SHIFT(heap);
+
+	// shift arena_id
+	if ((void*)arena == chunk_ptr)
+		chunk_ptr = FT_MAL_STATE_SHIFT(chunk_ptr);
+
+	// if heap type is large, then ptr should be the same as chunk shift
+	if (heap->heap_type == FT_MAL_LARGE_HEAP_TYPE)
+	{
+		if (ptr == FT_MAL_CHUNK_SHIFT(chunk_ptr))
+			return (true);
+	}
+	else if (heap->heap_type == FT_MAL_TINY_HEAP_TYPE)
+	{
+		// if heap type is tiny, then the difference between the first chunk and
+		// the pointer must be evenly divided with the size of the chunk
+		if (!((ptr - FT_MAL_CHUNK_SHIFT(chunk_ptr)) % FT_MAL_TINY_CHUNK_SIZE))
+			return (true);
+	}
+	else if (heap->heap_type == FT_MAL_SMALL_HEAP_TYPE)
+	{
+		while (chunk_ptr - (void*)heap < heap->total_size)
+		{
+			chunk = chunk_ptr;
+			if (FT_MAL_CHUNK_SHIFT(chunk_ptr) == ptr)
+				return (true);
+			chunk_ptr += (chunk->size + FT_MAL_CHUNK_SIZE);
+		}
+	}
+	return (false);
+}
+
 // checks is this pointer was allocated in this arena
 static bool	ft_mal_is_arenas_ptr(t_s_ft_mal_state *arena, void *ptr)
 {
 	t_s_ft_mal_heap_info	*heap;
-	t_e_ft_mal_heap_type	heap_type;
-
 
 	// maybe arena is not created
 	if (!arena)
 		return (false);
-
-	// determine heap type by ptr
-	heap_type = ft_mal_get_heap_type_by_ptr(ptr);
 	
 	// lock mutex for iterating throw arena
 	FT_MAL_MUTEX_LOCK(&arena->mutex);
@@ -176,11 +210,12 @@ static bool	ft_mal_is_arenas_ptr(t_s_ft_mal_state *arena, void *ptr)
 	heap = arena->heaps;
 	while (heap)
 	{
-		// is heap type equal
-		if (heap_type == heap->heap_type)
+		// is pointer inside heap
+		if (ptr > (void*)heap && (ptr - (void*)heap) <= (long int)heap->total_size)
 		{
-			// is pointer inside heap
-			if (ptr > (void*)heap && (ptr - (void*)heap) <= (long int)heap->total_size)
+			if (!ft_mal_is_correct_heap_ptr(arena, heap, ptr))
+				break;
+			else
 				return (true);
 		}
 		heap = heap->next;

@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 16:23:18 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/31 22:09:33 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/06 20:06:00 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,8 @@
 /*
 *********** Number of chunks in heap ************
 */
-# define FT_MAL_NB_OF_TINY_CHUNKS 240
-# define FT_MAL_NB_OF_SMALL_CHUNKS 120
+# define FT_MAL_NB_OF_TINY_CHUNKS 127
+# define FT_MAL_NB_OF_SMALL_CHUNKS 128
 
 /*
 *************************** Variables ****************************************

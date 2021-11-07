@@ -8,11 +8,20 @@
 			"name": "(gdb) Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/a.out",
+			"program": "${workspaceFolder}/a",
 			"args": [],
 			"stopAtEntry": true,
 			"cwd": "${fileDirname}",
-			"environment": [],
+			"environment": [
+				{
+					"name": "LD_LIBRARY_PATH",
+					"value": "/home/aashara-/projects/malloc"
+				},
+				{
+					"name": "LD_PRELOAD",
+					"value": "libft_malloc.so"
+				}
+			],
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"setupCommands": [

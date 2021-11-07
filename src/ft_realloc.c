@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:58:58 by aashara-          #+#    #+#             */
-/*   Updated: 2021/10/31 23:32:32 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/07 14:24:54 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	*realloc(void *ptr, size_t size)
 
 	// no one arena allocated this memory (memory was not allocated error)
 	if (!arena)
-		return (ptr);
+		return (NULL);
 
 	// realloc memory by ptr
 	res = ft_mal_realloc_memory(arena, ptr, size);

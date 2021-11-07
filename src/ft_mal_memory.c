@@ -6,7 +6,7 @@
 /*   By: aashara- <aashara-@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/05 10:59:02 by aashara-          #+#    #+#             */
-/*   Updated: 2021/11/05 11:01:36 by aashara-         ###   ########.fr       */
+/*   Updated: 2021/11/07 13:28:52 by aashara-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,6 +197,10 @@ static void	ft_mal_free_tiny_chunk(t_s_ft_mal_state *arena, void *ptr)
 
 	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
 
+	// already freed pointer
+	if (chunk == arena->free_tiny_chunks)
+		return ;
+
 	// assign max size of tiny chunks
 	chunk->size = FT_MAL_TINY_CHUNK_MAX_ALLOC_SIZE;
 
@@ -210,6 +214,10 @@ static void	ft_mal_free_small_chunk(t_s_ft_mal_state *arena, void *ptr)
 	t_s_ft_mal_chunk	*chunk;
 	
 	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+	
+	// already freed pointer
+	if (chunk == arena->free_small_chunks)
+		return ;
 	
 	// add freed small chunk to list
 	ft_mal_add_chunk_to_list(&arena->free_small_chunks, chunk);
@@ -261,6 +269,10 @@ static void	*ft_mal_realloc_tiny_chunk(t_s_ft_mal_state *arena, void *ptr, size_
 	
 	// get chunk
 	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
+
+	// pointer already freed
+	if (chunk == arena->free_tiny_chunks || chunk->prev || chunk->next)
+		return (ft_mal_allocate_memory(arena, size));
 	
 	// determine new heap type by size
 	new_heap_type = ft_mal_get_heap_type_by_alloc_size(size);
@@ -298,6 +310,10 @@ static void	*ft_mal_realloc_small_chunk(t_s_ft_mal_state *arena, void *ptr, size
 	// get chunk
 	chunk = FT_MAL_CHUNK_BACK_SHIFT(ptr);
 	
+	// pointer already freed
+	if (chunk == arena->free_small_chunks || chunk->prev || chunk->next)
+		return (ft_mal_allocate_memory(arena, size));
+
 	new_ptr = ft_mal_allocate_memory(arena, size);
 
 	// error happened
