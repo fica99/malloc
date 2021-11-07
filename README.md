@@ -71,9 +71,10 @@ To understand in detail this implementation, [**please refer to the wiki**](http
 
 ## Testing
 
-You can change your own malloc istead of system and test it with system commands
+You can change your own malloc istead of system and test it with system commands using my scripts
 
 ```bash
-➜  malloc git:(main) ✗ LD_PRELOAD=$PWD/libft_malloc.so ls
-Makefile  README.md  en.subject.pdf  include  libft_malloc.so  libft_malloc_x86_64.so  libftprintf  src  tmp
+➜  malloc git:(main) ✗ ./run_scripts/run_linux.sh  ls     
+en.subject.pdf  libft_malloc.so               libftprintf  README.md    src
+include         libft_malloc_x86_64_Linux.so  Makefile     run_scripts  tmp
 ```
